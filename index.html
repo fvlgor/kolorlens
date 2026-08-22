@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,6 +51,12 @@
             box-sizing: border-box;
             margin: 0 auto;
             min-height: 0;
+            position: relative;
+        }
+
+        .container.drag-over {
+            border: 2px dashed var(--primary);
+            background: #140505;
         }
 
         .initial-screen {
@@ -61,7 +66,57 @@
             justify-content: center;
             width: 100%;
             flex: 1;
-            gap: 20px;
+            gap: 16px;
+        }
+
+        .title-header-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+
+        .initial-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ff8888 0%, #aa0000 50%, #440000 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+            transform-origin: center;
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .title-lens-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #000;
+            border: 4px solid #aa0000;
+            box-shadow: 0 0 15px rgba(170, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform-origin: center;
+            flex-shrink: 0;
+        }
+
+        .title-lens-icon::after {
+            content: '';
+            width: 12px;
+            height: 25px;
+            background: linear-gradient(135deg, #333 0%, #111 100%);
+            border: 2px solid #555;
+            border-radius: 0 0 6px 6px;
+            position: absolute;
+            bottom: -23px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .upload-btn-large {
@@ -81,14 +136,33 @@
         }
         .upload-btn-large:hover { opacity: 0.9; }
 
+        .initial-lang-select {
+            background: #1f1f1f;
+            color: var(--text);
+            border: 1px solid #444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+            width: 160px;
+            text-align: center;
+        }
+
         .app-workspace {
             display: none;
+            opacity: 0;
             width: 100%;
             flex: 1;
             flex-direction: column;
             align-items: center;
             gap: 10px;
             min-height: 0;
+            transition: opacity 0.8s ease-in;
+        }
+
+        .app-workspace.visible {
+            opacity: 1;
         }
 
         .control-panel-group {
@@ -133,6 +207,12 @@
         }
         .code-box:hover { filter: brightness(1.2); }
 
+        .toolbar-action-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
         .upload-btn-small {
             background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
             color: white;
@@ -148,6 +228,24 @@
             outline: 1px solid rgba(0, 0, 0, 0.5);
         }
         .upload-btn-small:hover { opacity: 0.9; }
+
+        .info-toggle-btn {
+            background: #1a1a1a;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background 0.2s;
+        }
+        .info-toggle-btn:hover { background: #333333; }
+
         input[type="file"] { display: none; }
 
         .canvas-viewport {
@@ -185,12 +283,21 @@
         #magnifierWrapper {
             position: absolute;
             pointer-events: none;
-            transform: translate(-50%, -80px);
+            transform: translate(-50%, -65px);
             z-index: 2147483647;
             display: none;
             width: 160px;
-            height: 160px;
+            height: 200px;
             will-change: left, top;
+        }
+
+        .lens-body-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 160px;
+            height: 160px;
+            pointer-events: none;
         }
 
         #lensCanvas {
@@ -204,39 +311,115 @@
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22" stroke="white" stroke-width="2"/><line x1="12" y1="2" x2="12" y2="22" stroke="black" stroke-width="1"/><line x1="2" y1="12" x2="22" y2="12" stroke="white" stroke-width="2"/><line x1="2" y1="12" x2="22" y2="12" stroke="black" stroke-width="1"/></svg>') 12 12, crosshair;
         }
 
-        .lens-wheel-btn {
+        .lens-handle {
             position: absolute;
-            width: 18px;
-            height: 18px;
-            background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            top: 71px;
-            left: 145px;
-            cursor: pointer;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 45px;
+            background: linear-gradient(135deg, #333333 0%, #111111 100%);
+            border: 2px solid #555555;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
             pointer-events: auto;
-            box-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
-            z-index: 2147483648;
-            touch-action: none;
+            cursor: grab;
+        }
+        .lens-handle:active {
+            cursor: grabbing;
+        }
+
+        .zoom-toolbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 6px 0;
+            flex-shrink: 0;
+        }
+
+        .zoom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 240px;
+            height: 6px;
+            background: #222222;
+            border-radius: 3px;
+            outline: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(255,0,0,0.8);
+        }
+
+        .instructions-popup {
+            display: none;
+            position: absolute;
+            bottom: 45px;
+            right: 0;
+            background: #141414;
+            border: 1px solid #333333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            width: 280px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.9);
+            z-index: 10005;
+            line-height: 1.4;
+            text-align: left;
+        }
+        .instructions-popup.active { display: block; }
+        .instructions-popup strong { color: #ffffff; }
+
+        .lang-select {
+            width: 100%;
+            background: #1f1f1f;
+            color: var(--text);
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 11px;
+            outline: none;
+            cursor: pointer;
         }
 
         footer {
-            margin-top: 10px;
+            margin-top: 6px;
             font-size: 11px;
             color: var(--text-muted);
             text-align: center;
             z-index: 10000;
             position: relative;
             flex-shrink: 0;
-            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         footer .credits {
             font-weight: 700;
             color: #ffffff;
-            margin-bottom: 3px;
             font-size: 12px;
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .flying-title {
+            position: fixed;
+            z-index: 99999;
+            pointer-events: none;
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         #toast {
@@ -257,12 +440,24 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="dropContainer">
         <div class="initial-screen" id="initialScreen">
-            <label class="upload-btn-large">
+            <div class="title-header-wrapper" id="titleHeaderWrapper">
+                <h1 class="initial-title" id="initialTitleText">Precision Color Picker</h1>
+                <div class="title-lens-icon" id="titleLensIcon"></div>
+            </div>
+            <label class="upload-btn-large" id="chooseImageBtnText">
                 Choose Image
                 <input type="file" id="imageLoaderInitial" accept="image/*">
             </label>
+            <select class="initial-lang-select" id="initialLangSelector">
+                <option value="en" selected>English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="zh">中文</option>
+            </select>
+            <div style="font-size: 12px; color: var(--text-muted);" id="dropHintText">Or drag and drop an image here</div>
         </div>
         <div class="app-workspace" id="appWorkspace">
             <div class="control-panel-group" id="controlPanelGroup">
@@ -270,34 +465,106 @@
                     <div class="codes-group">
                         <span class="code-box" id="hexCode" onclick="copyToClipboard(this.innerText)">HEX: --</span>
                         <span class="code-box" id="rgbCode" onclick="copyToClipboard(this.innerText)">RGB: --</span>
-                        <span class="code-box" id="pantoneCode" onclick="copyToClipboard(this.innerText)">PANTONE: --</span>
                     </div>
-                    <label class="upload-btn-small">
-                        Change Image
-                        <input type="file" id="imageLoaderActive" accept="image/*">
-                    </label>
                 </div>
             </div>
             <div class="canvas-viewport" id="canvasViewport">
                 <div class="canvas-container" id="canvasContainer">
                     <canvas id="imageCanvas"></canvas>
                     <div id="magnifierWrapper">
-                        <canvas id="lensCanvas" width="160" height="160"></canvas>
-                        <div class="lens-wheel-btn" id="lensWheelBtn"></div>
+                        <div class="lens-body-container">
+                            <canvas id="lensCanvas" width="160" height="160"></canvas>
+                        </div>
+                        <div class="lens-handle" id="lensHandle" title="Drag lens handle"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="zoom-toolbar" id="zoomToolbar">
+                <span style="font-size: 11px; color: var(--text-muted);" id="zoomLabelText">Zoom</span>
+                <input type="range" min="1" max="30" step="0.5" value="1.5" class="zoom-slider" id="zoomSlider">
+                <div class="toolbar-action-group" style="position: relative;">
+                    <label class="upload-btn-small" id="changeImageBtnText">
+                        Change Image
+                        <input type="file" id="imageLoaderActive" accept="image/*">
+                    </label>
+                    <button class="info-toggle-btn" id="infoToggleBtn" title="Toggle Instructions">?</button>
+                    <div class="instructions-popup" id="instructionsPopup">
+                        <select class="lang-select" id="langSelector">
+                            <option value="en" selected>English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="zh">中文</option>
+                        </select>
+                        <div id="instructionsText">
+                            <strong>Instructions:</strong> Tap or click precisely anywhere inside the lens to instantly jump the magnifier center to that pixel spot. Drag the handle or lens to pan. Use the zoom slider or mouse wheel over the lens to scale. Click codes to copy values.
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <footer>
-        <div class="credits">Created by KAWN HYPERSYSTEMS</div>
-        <div><strong>Instructions:</strong> Drag directly inside the lens or click anywhere on the image to inspect coordinates.</div>
-        <div>Use mouse wheel over the lens or drag the circular wheel button to adjust zoom. Click code boxes to copy values.</div>
+        <span id="footerTitleSlot"></span>
+        <div class="credits" id="footerCreditsText">Created by KAWN HYPERSYSTEMS</div>
     </footer>
     <div id="toast">Copied to clipboard!</div>
     <script>
-        const _0x5a3e = ["Q095QklHSFRDIEtBV04gSElQRVJZU1RFTVMgMjAyNg==", "atob"];
-        const verifyOwnership = () => { try { return window[_0x5a3e[1]](_0x5a3e[0]); } catch(e) { return ""; } };
+        // Distributed Integrity Fragment 1 ("CAMA")
+        const translations = {
+            en: {
+                title: "Precision Color Picker",
+                chooseImage: "Choose Image",
+                changeImage: "Change Image",
+                zoom: "Zoom",
+                dropHint: "Or drag and drop an image here",
+                footerCredits: "Created by KAWN HYPERSYSTEMS",
+                instructions: "<strong>Instructions:</strong> Tap or click precisely anywhere inside the lens to instantly jump the magnifier center to that pixel spot. Drag the handle or lens to pan. Use the zoom slider or mouse wheel over the lens to scale. Click codes to copy values.",
+                toast: "Copied to clipboard!",
+                _f1: "CAMA"
+            },
+            es: {
+                title: "Selector de Color Preciso",
+                chooseImage: "Elegir Imagen",
+                changeImage: "Cambiar Imagen",
+                zoom: "Zoom",
+                dropHint: "O arrastra y suelta una imagen aquí",
+                footerCredits: "Creado por KAWN HYPERSYSTEMS",
+                instructions: "<strong>Instrucciones:</strong> Toque o haga clic con precisión en cualquier lugar dentro de la lente para saltar instantáneamente al píxel. Arrastre el mango o la lente. Use el control deslizante de zoom o la rueda del mouse para escalar. Haga clic en los códigos para copiar.",
+                toast: "¡Copiado al portapapeles!"
+            },
+            fr: {
+                title: "Sélecteur de Couleur de Précision",
+                chooseImage: "Choisir une image",
+                changeImage: "Changer l'image",
+                zoom: "Zoom",
+                dropHint: "Ou glissez-déposez une image ici",
+                footerCredits: "Créé par KAWN HYPERSYSTEMS",
+                instructions: "<strong>Instructions :</strong> Appuyez ou cliquez précisément n'importe où à l'intérieur de la lentille pour centrer la loupe sur ce pixel. Glissez la poignée ou la lentille. Utilisez le curseur de zoom ou la molette. Cliquez sur les codes pour copier.",
+                toast: "Copié dans le presse-papier !"
+            },
+            de: {
+                title: "Präziser Farbwähler",
+                chooseImage: "Bild auswählen",
+                changeImage: "Bild ändern",
+                zoom: "Zoom",
+                dropHint: "Oder Bild hierher ziehen und ablegen",
+                footerCredits: "Erstellt von KAWN HYPERSYSTEMS",
+                instructions: "<strong>Anleitung:</strong> Tippen oder klicken Sie präzise in die Lupe, um direkt zu diesem Pixel zu springen. Ziehen Sie den Griff oder die Lupe zum Verschieben. Verwenden Sie den Zoom-Schieberegler oder das Mausrad. Codes zum Kopieren anklicken.",
+                toast: "In die Zwischenablage kopiert!"
+            },
+            zh: {
+                title: "精密取色器",
+                chooseImage: "选择图片",
+                changeImage: "更换图片",
+                zoom: "缩放",
+                dropHint: "或将图片拖放至此处",
+                footerCredits: "由 KAWN HYPERSYSTEMS 创建",
+                instructions: "<strong>说明：</strong> 在透镜内任意位置精确点击或轻触，即可将放大镜中心跳转到该像素点。拖动手柄或透镜进行平移。使用缩放滑块或鼠标滚轮进行缩放。点击代码框可复制数值。",
+                toast: "已复制到剪贴板！"
+            }
+        };
 
         const initialScreen = document.getElementById('initialScreen');
         const appWorkspace = document.getElementById('appWorkspace');
@@ -309,21 +576,193 @@
         const lensCtx = lensCanvas.getContext('2d');
         const canvasContainer = document.getElementById('canvasContainer');
         const magnifierWrapper = document.getElementById('magnifierWrapper');
-        const lensWheelBtn = document.getElementById('lensWheelBtn');
+        const lensHandle = document.getElementById('lensHandle');
         const controlPanelGroup = document.getElementById('controlPanelGroup');
         const hexCode = document.getElementById('hexCode');
         const rgbCode = document.getElementById('rgbCode');
-        const pantoneCode = document.getElementById('pantoneCode');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const infoToggleBtn = document.getElementById('infoToggleBtn');
+        const instructionsPopup = document.getElementById('instructionsPopup');
+        const instructionsText = document.getElementById('instructionsText');
+        const initialTitleText = document.getElementById('initialTitleText');
+        const titleLensIcon = document.getElementById('titleLensIcon');
+        const titleHeaderWrapper = document.getElementById('titleHeaderWrapper');
+        const chooseImageBtnText = document.getElementById('chooseImageBtnText');
+        const changeImageBtnText = document.getElementById('changeImageBtnText');
+        const zoomLabelText = document.getElementById('zoomLabelText');
+        const dropHintText = document.getElementById('dropHintText');
+        const footerCreditsText = document.getElementById('footerCreditsText');
+        const footerTitleSlot = document.getElementById('footerTitleSlot');
+        const langSelector = document.getElementById('langSelector');
+        const initialLangSelector = document.getElementById('initialLangSelector');
         const toast = document.getElementById('toast');
+        const dropContainer = document.getElementById('dropContainer');
 
         let img = new Image();
         let currentCanvasX = 0, currentCanvasY = 0;
-        let isDraggingLens = false, isDraggingWheel = false;
+        let isDraggingLens = false;
         let dragOffsetX = 0, dragOffsetY = 0;
         let currentZoom = 1.5;
         let animationFrameId = null;
+        let currentLang = 'en';
+        let isInitialLoad = true;
 
-        function handleImageUpload(e) {
+        // Distributed Integrity Fragment 2 ("88")
+        const SYSTEM_CONFIG_REGISTRY = {
+            _f2: "88"
+        };
+
+        // Distributed Integrity Fragment 3 ("0831HDFNH0")
+        const RUNTIME_SALT = "0831HDFNH0";
+
+        // Core Integrity Verification Routine for "CAMA880831HDFNH0"
+        function verifyIntegrity() {
+            try {
+                let f1 = translations.en._f1;
+                let f2 = SYSTEM_CONFIG_REGISTRY._f2;
+                let f3 = RUNTIME_SALT;
+                
+                if ((f1 + f2 + f3) !== "CAMA880831HDFNH0") {
+                    throw new Error("Integrity violation");
+                }
+            } catch (err) {
+                document.body.innerHTML = "<div style='display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#ff0000;font-family:monospace;font-size:18px;text-align:center;'>FATAL SYSTEM ERROR: INTEGRITY VALIDATION FAILED.</div>";
+                throw new Error("Execution halted.");
+            }
+        }
+
+        verifyIntegrity();
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            langSelector.value = lang;
+            initialLangSelector.value = lang;
+            const t = translations[currentLang];
+            initialTitleText.innerText = t.title;
+            chooseImageBtnText.childNodes[0].nodeValue = t.chooseImage + " ";
+            changeImageBtnText.childNodes[0].nodeValue = t.changeImage + " ";
+            zoomLabelText.innerText = t.zoom;
+            dropHintText.innerText = t.dropHint;
+            footerCreditsText.innerText = t.footerCredits;
+            instructionsText.innerHTML = t.instructions;
+            toast.innerText = t.toast;
+            if (footerTitleSlot.innerText) {
+                footerTitleSlot.innerText = t.title + " |";
+            }
+        }
+
+        langSelector.addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+        });
+
+        initialLangSelector.addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+        });
+
+        infoToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            instructionsPopup.classList.toggle('active');
+        });
+        window.addEventListener('click', () => {
+            instructionsPopup.classList.remove('active');
+        });
+        instructionsPopup.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        function animateTitleToFooter() {
+            const titleRect = initialTitleText.getBoundingClientRect();
+            const lensRect = titleLensIcon.getBoundingClientRect();
+            
+            footerTitleSlot.innerText = translations[currentLang].title + " |";
+            const endTitleRect = footerTitleSlot.getBoundingClientRect();
+            footerTitleSlot.innerText = "";
+
+            initialScreen.style.display = 'none';
+            appWorkspace.style.display = 'flex';
+            currentCanvasX = img.width / 2;
+            currentCanvasY = img.height / 2;
+            
+            const rect = canvas.getBoundingClientRect();
+            const containerRect = canvasContainer.getBoundingClientRect();
+            const targetLensLeft = (rect.left - containerRect.left) + (currentCanvasX * (rect.width / canvas.width));
+            const targetLensTop = (rect.top - containerRect.top) + (currentCanvasY * (rect.height / canvas.height));
+
+            const titleFlyer = document.createElement('div');
+            titleFlyer.className = 'flying-title';
+            titleFlyer.innerText = translations[currentLang].title;
+            titleFlyer.style.background = window.getComputedStyle(initialTitleText).background;
+            titleFlyer.style.webkitBackgroundClip = 'text';
+            titleFlyer.style.webkitTextFillColor = 'transparent';
+            titleFlyer.style.left = titleRect.left + 'px';
+            titleFlyer.style.top = titleRect.top + 'px';
+            titleFlyer.style.fontSize = window.getComputedStyle(initialTitleText).fontSize;
+            document.body.appendChild(titleFlyer);
+
+            const lensMorpher = document.createElement('div');
+            lensMorpher.style.position = 'fixed';
+            lensMorpher.style.zIndex = '99999';
+            lensMorpher.style.pointerEvents = 'none';
+            lensMorpher.style.width = '70px';
+            lensMorpher.style.height = '95px';
+            lensMorpher.style.left = lensRect.left + 'px';
+            lensMorpher.style.top = lensRect.top + 'px';
+            lensMorpher.style.transformOrigin = 'top center';
+            lensMorpher.style.transition = 'all 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
+
+            const morpherBody = document.createElement('div');
+            morpherBody.style.width = '70px';
+            morpherBody.style.height = '70px';
+            morpherBody.style.borderRadius = '50%';
+            morpherBody.style.background = '#000';
+            morpherBody.style.border = '4px solid #aa0000';
+            morpherBody.style.boxShadow = '0 0 15px rgba(170, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.6)';
+            lensMorpher.appendChild(morpherBody);
+
+            const morpherHandle = document.createElement('div');
+            morpherHandle.style.position = 'absolute';
+            morpherHandle.style.bottom = '0';
+            morpherHandle.style.left = '50%';
+            morpherHandle.style.transform = 'translateX(-50%)';
+            morpherHandle.style.width = '12px';
+            morpherHandle.style.height = '25px';
+            morpherHandle.style.background = 'linear-gradient(135deg, #333 0%, #111 100%)';
+            morpherHandle.style.border = '2px solid #555';
+            morpherHandle.style.borderRadius = '0 0 6px 6px';
+            lensMorpher.appendChild(morpherHandle);
+
+            document.body.appendChild(lensMorpher);
+
+            titleHeaderWrapper.style.visibility = 'hidden';
+
+            titleFlyer.getBoundingClientRect();
+            lensMorpher.getBoundingClientRect();
+
+            const titleScale = endTitleRect.height / titleRect.height;
+            const titleDeltaX = endTitleRect.left - titleRect.left;
+            const titleDeltaY = endTitleRect.top - titleRect.top;
+            titleFlyer.style.transform = `translate(${titleDeltaX}px, ${titleDeltaY}px) scale(${titleScale})`;
+
+            const finalGlobalX = containerRect.left + targetLensLeft;
+            const finalGlobalY = containerRect.top + targetLensTop - 65;
+            const lensScale = 160 / 70;
+            const lensDeltaX = finalGlobalX - lensRect.left - (160 / 2) + (70 / 2);
+            const lensDeltaY = finalGlobalY - lensRect.top;
+            lensMorpher.style.transform = `translate(${lensDeltaX}px, ${lensDeltaY}px) scale(${lensScale})`;
+
+            setTimeout(() => {
+                titleFlyer.remove();
+                lensMorpher.remove();
+                footerTitleSlot.innerText = translations[currentLang].title + " |";
+                
+                appWorkspace.classList.add('visible');
+                controlPanelGroup.style.visibility = 'visible';
+                updateMagnifierPosition();
+            }, 1200);
+        }
+
+        function loadImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
             const reader = new FileReader();
             reader.onload = function(event) {
                 img.onload = function() {
@@ -331,20 +770,53 @@
                     canvas.height = img.height;
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0);
-                    initialScreen.style.display = 'none';
-                    appWorkspace.style.display = 'flex';
-                    controlPanelGroup.style.visibility = 'visible';
-                    currentCanvasX = img.width / 2;
-                    currentCanvasY = img.height / 2;
-                    updateMagnifierPosition();
+                    
+                    if (isInitialLoad) {
+                        animateTitleToFooter();
+                        isInitialLoad = false;
+                    } else {
+                        currentCanvasX = img.width / 2;
+                        currentCanvasY = img.height / 2;
+                        appWorkspace.classList.add('visible');
+                        controlPanelGroup.style.visibility = 'visible';
+                        updateMagnifierPosition();
+                    }
                 };
                 img.src = event.target.result;
             };
-            if (e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+            reader.readAsDataURL(file);
         }
 
-        imageLoaderInitial.addEventListener('change', handleImageUpload);
-        imageLoaderActive.addEventListener('change', handleImageUpload);
+        imageLoaderInitial.addEventListener('change', (e) => {
+            if (e.target.files[0]) loadImageFile(e.target.files[0]);
+        });
+        imageLoaderActive.addEventListener('change', (e) => {
+            if (e.target.files[0]) loadImageFile(e.target.files[0]);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropContainer.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropContainer.classList.add('drag-over');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropContainer.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropContainer.classList.remove('drag-over');
+            }, false);
+        });
+
+        dropContainer.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length > 0) {
+                loadImageFile(files[0]);
+            }
+        }, false);
 
         function getCanvasPosFromClient(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
@@ -365,16 +837,7 @@
             magnifierWrapper.style.top = `${topPx}px`;
             drawLens(currentCanvasX, currentCanvasY, currentZoom);
             pickColor(currentCanvasX, currentCanvasY);
-            updateWheelPosition();
-        }
-
-        function updateWheelPosition() {
-            const normalized = (currentZoom - 1) / 29;
-            const angle = -Math.PI / 2 + normalized * (1.5 * Math.PI);
-            const x = 80 + 72 * Math.cos(angle) - 9;
-            const y = 80 + 72 * Math.sin(angle) - 9;
-            lensWheelBtn.style.left = `${x}px`;
-            lensWheelBtn.style.top = `${y}px`;
+            zoomSlider.value = currentZoom;
         }
 
         function getContrastYIQ(hexcolor) {
@@ -417,27 +880,6 @@
             lensCtx.stroke();
         }
 
-        function approximatePantone(r, g, b) {
-            const pmsList = [
-                { name: "Pantone Neutral Black C", r: 43, g: 43, b: 43 },
-                { name: "Pantone Cool Gray 1 C", r: 217, g: 217, b: 214 },
-                { name: "Pantone Red 032 C", r: 239, g: 51, b: 64 },
-                { name: "Pantone Process Blue C", r: 0, g: 130, b: 202 },
-                { name: "Pantone Yellow C", r: 254, g: 221, b: 0 },
-                { name: "Pantone Green C", r: 0, g: 148, b: 115 },
-                { name: "Pantone Violet C", r: 77, g: 61, b: 142 },
-                { name: "Pantone Orange 021 C", r: 254, g: 80, b: 0 },
-                { name: "Pantone Reflex Blue C", r: 0, g: 10, b: 143 },
-                { name: "Pantone White", r: 255, g: 255, b: 255 }
-            ];
-            let closest = pmsList[0], minDist = Infinity;
-            for (let p of pmsList) {
-                let dist = Math.pow(p.r - r, 2) + Math.pow(p.g - g, 2) + Math.pow(p.b - b, 2);
-                if (dist < minDist) { minDist = dist; closest = p; }
-            }
-            return closest.name;
-        }
-
         function pickColor(x, y) {
             const intX = Math.floor(x), intY = Math.floor(y);
             if (intX < 0 || intY < 0 || intX >= canvas.width || intY >= canvas.height) return;
@@ -451,11 +893,12 @@
             rgbCode.innerText = `RGB: rgb(${r}, ${g}, ${b})`;
             rgbCode.style.backgroundColor = hex;
             rgbCode.style.color = getContrastYIQ(hex);
-
-            pantoneCode.innerText = `PANTONE: ${approximatePantone(r, g, b)}`;
-            pantoneCode.style.backgroundColor = hex;
-            pantoneCode.style.color = getContrastYIQ(hex);
         }
+
+        zoomSlider.addEventListener('input', (e) => {
+            currentZoom = parseFloat(e.target.value);
+            updateMagnifierPosition();
+        });
 
         lensCanvas.addEventListener('wheel', (e) => {
             e.preventDefault();
@@ -465,8 +908,11 @@
 
         lensCanvas.addEventListener('click', (e) => {
             const rect = lensCanvas.getBoundingClientRect();
-            currentCanvasX = Math.max(0, Math.min(canvas.width, currentCanvasX + (e.clientX - rect.left - 80) / currentZoom));
-            currentCanvasY = Math.max(0, Math.min(canvas.height, currentCanvasY + (e.clientY - rect.top - 80) / currentZoom));
+            const clickOffsetX = e.clientX - rect.left - (rect.width / 2);
+            const clickOffsetY = e.clientY - rect.top - (rect.height / 2);
+            
+            currentCanvasX = Math.max(0, Math.min(canvas.width, currentCanvasX + (clickOffsetX / currentZoom)));
+            currentCanvasY = Math.max(0, Math.min(canvas.height, currentCanvasY + (clickOffsetY / currentZoom)));
             updateMagnifierPosition();
         });
 
@@ -485,21 +931,20 @@
             dragOffsetY = pos.y - currentCanvasY;
         }
 
-        lensCanvas.addEventListener('mousedown', (e) => { e.stopPropagation(); startLensDrag(e.clientX, e.clientY); });
-        lensCanvas.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); startLensDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+        lensHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); startLensDrag(e.clientX, e.clientY); });
+        lensHandle.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); startLensDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
 
-        lensWheelBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); isDraggingWheel = true; });
-        lensWheelBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); isDraggingWheel = true; }, { passive: false });
+        lensCanvas.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            startLensDrag(e.clientX, e.clientY);
+        });
+
+        lensCanvas.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            startLensDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
 
         window.addEventListener('mousemove', (e) => {
-            if (isDraggingWheel) {
-                const rect = lensCanvas.getBoundingClientRect();
-                let normalized = (Math.atan2(e.clientY - (rect.top + 80), e.clientX - (rect.left + 80)) + Math.PI / 2) / (1.5 * Math.PI);
-                if (normalized < 0) normalized += 1;
-                currentZoom = Math.min(30, Math.max(1, parseFloat((1 + normalized * 29).toFixed(1))));
-                updateMagnifierPosition();
-                return;
-            }
             if (!isDraggingLens || !img.src) return;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(() => {
@@ -511,14 +956,6 @@
         });
 
         window.addEventListener('touchmove', (e) => {
-            if (isDraggingWheel && e.touches.length > 0) {
-                const rect = lensCanvas.getBoundingClientRect();
-                let normalized = (Math.atan2(e.touches[0].clientY - (rect.top + 80), e.touches[0].clientX - (rect.left + 80)) + Math.PI / 2) / (1.5 * Math.PI);
-                if (normalized < 0) normalized += 1;
-                currentZoom = Math.min(30, Math.max(1, parseFloat((1 + normalized * 29).toFixed(1))));
-                updateMagnifierPosition();
-                return;
-            }
             if (!isDraggingLens || !img.src) return;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(() => {
@@ -529,8 +966,8 @@
             });
         }, { passive: false });
 
-        window.addEventListener('mouseup', () => { isDraggingLens = false; isDraggingWheel = false; });
-        window.addEventListener('touchend', () => { isDraggingLens = false; isDraggingWheel = false; });
+        window.addEventListener('mouseup', () => { isDraggingLens = false; });
+        window.addEventListener('touchend', () => { isDraggingLens = false; });
         window.addEventListener('resize', () => { if (img.src) updateMagnifierPosition(); });
 
         function copyToClipboard(text) {
