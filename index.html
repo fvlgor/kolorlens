@@ -187,18 +187,18 @@
 
         .codes-group {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
         }
 
         .code-box {
-            padding: 6px 12px;
+            padding: 6px 16px;
             border-radius: 6px;
             font-family: monospace;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             border: 1px solid rgba(255, 255, 255, 0.3);
             transition: filter 0.2s;
@@ -283,11 +283,11 @@
         #magnifierWrapper {
             position: absolute;
             pointer-events: none;
-            transform: translate(-50%, -65px);
+            transform: translate(-50%, -80px); /* Adjusted anchor point for perfect centering */
             z-index: 2147483647;
             display: none;
             width: 160px;
-            height: 200px;
+            height: 205px;
             will-change: left, top;
         }
 
@@ -511,7 +511,7 @@
     </footer>
     <div id="toast">Copied to clipboard!</div>
     <script>
-        // Distributed Integrity Fragment 1 ("CAMA")
+        // Copyright Fragment 1 (Hidden in Translation Configuration)
         const translations = {
             en: {
                 title: "Precision Color Picker",
@@ -522,7 +522,7 @@
                 footerCredits: "Created by KAWN HYPERSYSTEMS",
                 instructions: "<strong>Instructions:</strong> Tap or click precisely anywhere inside the lens to instantly jump the magnifier center to that pixel spot. Drag the handle or lens to pan. Use the zoom slider or mouse wheel over the lens to scale. Click codes to copy values.",
                 toast: "Copied to clipboard!",
-                _f1: "CAMA"
+                _f1: "CAMA88"
             },
             es: {
                 title: "Selector de Color Preciso",
@@ -605,21 +605,21 @@
         let currentZoom = 1.5;
         let animationFrameId = null;
         let currentLang = 'en';
-        let isInitialLoad = true;
+        let isFirstLoad = true; // Tracks whether to run splash animation
 
-        // Distributed Integrity Fragment 2 ("88")
-        const SYSTEM_CONFIG_REGISTRY = {
-            _f2: "88"
+        // Copyright Fragment 2 (Hidden in configuration registry)
+        const SYSTEM_CONFIG = {
+            _f2: "0831"
         };
 
-        // Distributed Integrity Fragment 3 ("0831HDFNH0")
-        const RUNTIME_SALT = "0831HDFNH0";
+        // Copyright Fragment 3 (Hidden as Constant Salt)
+        const RUNTIME_SALT = "HDFNH0";
 
-        // Core Integrity Verification Routine for "CAMA880831HDFNH0"
+        // Integrity Verification Routine
         function verifyIntegrity() {
             try {
                 let f1 = translations.en._f1;
-                let f2 = SYSTEM_CONFIG_REGISTRY._f2;
+                let f2 = SYSTEM_CONFIG._f2;
                 let f3 = RUNTIME_SALT;
                 
                 if ((f1 + f2 + f3) !== "CAMA880831HDFNH0") {
@@ -744,7 +744,7 @@
             titleFlyer.style.transform = `translate(${titleDeltaX}px, ${titleDeltaY}px) scale(${titleScale})`;
 
             const finalGlobalX = containerRect.left + targetLensLeft;
-            const finalGlobalY = containerRect.top + targetLensTop - 65;
+            const finalGlobalY = containerRect.top + targetLensTop - 80;
             const lensScale = 160 / 70;
             const lensDeltaX = finalGlobalX - lensRect.left - (160 / 2) + (70 / 2);
             const lensDeltaY = finalGlobalY - lensRect.top;
@@ -766,19 +766,21 @@
             const reader = new FileReader();
             reader.onload = function(event) {
                 img.onload = function() {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0);
-                    
-                    if (isInitialLoad) {
+                    if (isFirstLoad) {
+                        isFirstLoad = false;
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0);
                         animateTitleToFooter();
-                        isInitialLoad = false;
                     } else {
+                        // Subsequent loads update instantly without animation
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0);
                         currentCanvasX = img.width / 2;
                         currentCanvasY = img.height / 2;
-                        appWorkspace.classList.add('visible');
-                        controlPanelGroup.style.visibility = 'visible';
                         updateMagnifierPosition();
                     }
                 };
