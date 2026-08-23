@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,12 +14,6 @@
             --text-muted: #a3a3a3;
         }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(255, 0, 0, 0.4); }
-            50% { box-shadow: 0 0 25px rgba(255, 0, 0, 0.9), inset 0 0 20px rgba(255, 0, 0, 0.7); }
-            100% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.4), inset 0 0 10px rgba(255, 0, 0, 0.4); }
-        }
-
         html, body {
             height: 100%;
             margin: 0;
@@ -27,6 +22,11 @@
             color: var(--text);
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             box-sizing: border-box;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         body {
@@ -52,6 +52,7 @@
             margin: 0 auto;
             min-height: 0;
             position: relative;
+            overflow: visible !important;
         }
 
         .container.drag-over {
@@ -67,10 +68,13 @@
             width: 100%;
             flex: 1;
             gap: 16px;
+            position: relative;
+            z-index: 10;
         }
 
         .title-header-wrapper {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 14px;
@@ -87,54 +91,75 @@
             -webkit-text-fill-color: transparent;
             text-align: center;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-            transform-origin: center;
-            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .title-lens-icon {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 100px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .title-lens-circle {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             background: #000;
-            border: 4px solid #aa0000;
-            box-shadow: 0 0 15px rgba(170, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.6);
+            border: 8px solid #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7);
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-sizing: border-box;
+        }
+
+        .title-lens-handle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 25px;
+            background: linear-gradient(135deg, #333333 0%, #111111 100%);
+            border: 2px solid #555555;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+        }
+
+        .initial-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 240px;
+        }
+
+        .action-btn-large {
+            background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: opacity 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            transform-origin: center;
-            flex-shrink: 0;
-        }
-
-        .title-lens-icon::after {
-            content: '';
-            width: 12px;
-            height: 25px;
-            background: linear-gradient(135deg, #333 0%, #111 100%);
-            border: 2px solid #555;
-            border-radius: 0 0 6px 6px;
-            position: absolute;
-            bottom: -23px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .upload-btn-large {
-            background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
-            color: white;
-            padding: 16px 32px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 18px;
-            transition: opacity 0.2s;
-            display: inline-block;
+            gap: 8px;
+            width: 100%;
             text-align: center;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.2);
             outline: 1px solid rgba(0, 0, 0, 0.5);
+            text-decoration: none;
+            box-sizing: border-box;
         }
-        .upload-btn-large:hover { opacity: 0.9; }
+        .action-btn-large:hover { opacity: 0.9; }
 
         .initial-lang-select {
             background: #1f1f1f;
@@ -171,7 +196,6 @@
             gap: 10px;
             justify-content: center;
             align-items: center;
-            visibility: hidden;
             flex-wrap: wrap;
             flex-shrink: 0;
         }
@@ -211,12 +235,18 @@
             display: flex;
             gap: 8px;
             align-items: center;
+            position: relative;
         }
 
-        .upload-btn-small {
+        .load-dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .load-menu-btn {
             background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
             color: white;
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
@@ -227,7 +257,59 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             outline: 1px solid rgba(0, 0, 0, 0.5);
         }
-        .upload-btn-small:hover { opacity: 0.9; }
+        .load-menu-btn:hover { opacity: 0.9; }
+
+        .popup-menu {
+            position: absolute;
+            bottom: 45px;
+            right: 0;
+            background: #141414;
+            border: 1px solid #333333;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.95);
+            text-align: left;
+            transform-origin: bottom right;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+        .popup-menu.hidden {
+            opacity: 0;
+            transform: scale(0.2);
+            pointer-events: none;
+        }
+
+        .load-menu-popup {
+            width: 170px;
+        }
+
+        .instructions-popup {
+            width: 320px;
+            padding: 12px 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .instructions-popup strong { color: #ffffff; }
+
+        .popup-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 12px;
+            color: var(--text);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            text-align: left;
+            transition: background 0.2s;
+            box-sizing: border-box;
+        }
+        .popup-menu-item:hover { background: #222222; }
 
         .info-toggle-btn {
             background: #1a1a1a;
@@ -243,6 +325,8 @@
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: background 0.2s;
+            position: relative;
+            z-index: 100;
         }
         .info-toggle-btn:hover { background: #333333; }
 
@@ -252,7 +336,7 @@
             width: 100%;
             flex: 1;
             min-height: 0;
-            overflow: visible;
+            overflow: hidden;
             border-radius: 8px;
             border: 2px solid #333333;
             outline: 1px solid rgba(255, 255, 255, 0.2);
@@ -261,6 +345,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 5;
         }
 
         .canvas-container {
@@ -278,16 +363,17 @@
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            z-index: 6;
         }
 
         #magnifierWrapper {
-            position: absolute;
+            position: fixed;
             pointer-events: none;
-            transform: translate(-50%, -80px); /* Adjusted anchor point for perfect centering */
-            z-index: 2147483647;
+            transform: translate(-50%, -90px);
+            z-index: 50;
             display: none;
-            width: 160px;
-            height: 205px;
+            width: 180px;
+            height: 180px;
             will-change: left, top;
         }
 
@@ -295,25 +381,25 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 160px;
-            height: 160px;
+            width: 180px;
+            height: 180px;
             pointer-events: none;
         }
 
         #lensCanvas {
             border: none;
             border-radius: 50%;
-            width: 160px;
-            height: 160px;
+            width: 180px;
+            height: 180px;
             background-color: #000;
             pointer-events: auto;
-            animation: pulseGlow 3s infinite ease-in-out;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7);
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22" stroke="white" stroke-width="2"/><line x1="12" y1="2" x2="12" y2="22" stroke="black" stroke-width="1"/><line x1="2" y1="12" x2="22" y2="12" stroke="white" stroke-width="2"/><line x1="2" y1="12" x2="22" y2="12" stroke="black" stroke-width="1"/></svg>') 12 12, crosshair;
         }
 
         .lens-handle {
             position: absolute;
-            bottom: 0;
+            bottom: -27px;
             left: 50%;
             transform: translateX(-50%);
             width: 20px;
@@ -324,6 +410,8 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.8);
             pointer-events: auto;
             cursor: grab;
+            z-index: 50;
+            display: block;
         }
         .lens-handle:active {
             cursor: grabbing;
@@ -342,7 +430,7 @@
         .zoom-slider {
             -webkit-appearance: none;
             appearance: none;
-            width: 240px;
+            width: 200px;
             height: 6px;
             background: #222222;
             border-radius: 3px;
@@ -360,25 +448,17 @@
             box-shadow: 0 0 6px rgba(255,0,0,0.8);
         }
 
-        .instructions-popup {
-            display: none;
-            position: absolute;
-            bottom: 45px;
-            right: 0;
-            background: #141414;
-            border: 1px solid #333333;
-            padding: 12px 16px;
-            border-radius: 8px;
+        .zoom-100-btn {
+            background: #1f1f1f;
+            color: var(--text);
+            border: 1px solid #444;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 11px;
-            color: var(--text-muted);
-            width: 280px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.9);
-            z-index: 10005;
-            line-height: 1.4;
-            text-align: left;
+            cursor: pointer;
+            font-weight: 600;
         }
-        .instructions-popup.active { display: block; }
-        .instructions-popup strong { color: #ffffff; }
+        .zoom-100-btn:hover { background: #333; }
 
         .lang-select {
             width: 100%;
@@ -391,6 +471,24 @@
             font-size: 11px;
             outline: none;
             cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .handle-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid #222;
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--text);
+            user-select: none;
+        }
+        .handle-toggle-label input {
+            cursor: pointer;
+            accent-color: var(--primary);
         }
 
         footer {
@@ -398,7 +496,7 @@
             font-size: 11px;
             color: var(--text-muted);
             text-align: center;
-            z-index: 10000;
+            z-index: 4;
             position: relative;
             flex-shrink: 0;
             display: flex;
@@ -415,16 +513,119 @@
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.5);
         }
 
-        .flying-title {
+        #splashOverlay {
             position: fixed;
-            z-index: 99999;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #ff0000;
+            opacity: 0;
             pointer-events: none;
-            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 500;
+            transition: opacity 0.4s ease;
+        }
+
+        #urlModalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #urlModalOverlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .url-modal {
+            background: #141414;
+            border: 1px solid #333;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        #urlModalOverlay.active .url-modal {
+            transform: scale(1);
+        }
+        .url-modal h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #fff;
+        }
+        .url-modal input[type="text"] {
+            background: #0a0a0a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .url-modal input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+        .url-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .url-modal-btn {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .url-modal-btn:hover { background: #333; }
+        .url-modal-btn.primary {
+            background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        #flyingLogoContainer {
+            position: fixed;
+            z-index: 300;
+            pointer-events: none;
+            transform-origin: center;
+            transition: transform 0.84s cubic-bezier(0.25, 1, 0.5, 1), width 0.84s cubic-bezier(0.25, 1, 0.5, 1), height 0.84s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7); }
+            50% { box-shadow: 0 0 35px rgba(255, 0, 0, 1), inset 0 0 20px rgba(255, 0, 0, 1); }
+            100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7); }
+        }
+        .pulsating {
+            animation: pulseGlow 0.4s ease-in-out 2;
         }
 
         #toast {
             position: fixed;
-            bottom: 30px;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: #ff0000;
             color: white;
             padding: 8px 16px;
@@ -433,23 +634,47 @@
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
-            z-index: 20000;
+            z-index: 1000;
             border: 1px solid rgba(255, 255, 255, 0.2);
             outline: 1px solid rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
+    <div id="splashOverlay"></div>
+
+    <div id="urlModalOverlay">
+        <div class="url-modal">
+            <h3 id="modalTitleText">Enter Image URL</h3>
+            <input type="text" id="urlModalInput" placeholder="https://example.com/image.jpg">
+            <div class="url-modal-actions">
+                <button class="url-modal-btn" id="urlModalCancel">Cancel</button>
+                <button class="url-modal-btn primary" id="urlModalSubmit">Load Image</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container" id="dropContainer">
         <div class="initial-screen" id="initialScreen">
             <div class="title-header-wrapper" id="titleHeaderWrapper">
                 <h1 class="initial-title" id="initialTitleText">Precision Color Picker</h1>
-                <div class="title-lens-icon" id="titleLensIcon"></div>
+                <div class="title-lens-icon" id="titleLensIcon">
+                    <div class="title-lens-circle" id="titleLensCircle"></div>
+                    <div class="title-lens-handle"></div>
+                </div>
             </div>
-            <label class="upload-btn-large" id="chooseImageBtnText">
-                Choose Image
-                <input type="file" id="imageLoaderInitial" accept="image/*">
-            </label>
+            <div class="initial-actions">
+                <label class="action-btn-large" id="chooseImageBtnText">
+                    📁 Choose Image
+                    <input type="file" id="imageLoaderInitial" accept="image/*">
+                </label>
+                <button class="action-btn-large" id="chooseSpectrumInitial">
+                    🌈 Color Spectrum
+                </button>
+                <button class="action-btn-large" id="chooseUrlInitial">
+                    🔗 Image URL
+                </button>
+            </div>
             <select class="initial-lang-select" id="initialLangSelector">
                 <option value="en" selected>English</option>
                 <option value="es">Español</option>
@@ -471,25 +696,25 @@
             <div class="canvas-viewport" id="canvasViewport">
                 <div class="canvas-container" id="canvasContainer">
                     <canvas id="imageCanvas"></canvas>
-                    <div id="magnifierWrapper">
-                        <div class="lens-body-container">
-                            <canvas id="lensCanvas" width="160" height="160"></canvas>
-                        </div>
-                        <div class="lens-handle" id="lensHandle" title="Drag lens handle"></div>
-                    </div>
                 </div>
             </div>
             
             <div class="zoom-toolbar" id="zoomToolbar">
                 <span style="font-size: 11px; color: var(--text-muted);" id="zoomLabelText">Zoom</span>
-                <input type="range" min="1" max="30" step="0.5" value="1.5" class="zoom-slider" id="zoomSlider">
+                <input type="range" min="1" max="30" step="0.5" value="1" class="zoom-slider" id="zoomSlider">
+                <button class="zoom-100-btn" id="zoom100Btn">100%</button>
                 <div class="toolbar-action-group" style="position: relative;">
-                    <label class="upload-btn-small" id="changeImageBtnText">
-                        Change Image
-                        <input type="file" id="imageLoaderActive" accept="image/*">
-                    </label>
+                    <div class="load-dropdown-container">
+                        <button class="load-menu-btn" id="loadMenuToggleBtn">LOAD ▼</button>
+                        <div class="popup-menu load-menu-popup hidden" id="loadMenuPopup">
+                            <button class="popup-menu-item" id="menuChooseImage">📁 Choose Image</button>
+                            <button class="popup-menu-item" id="menuColorSpectrum">🌈 Color Spectrum</button>
+                            <button class="popup-menu-item" id="menuImageUrl">🔗 Image URL</button>
+                        </div>
+                    </div>
+                    <input type="file" id="imageLoaderActive" accept="image/*">
                     <button class="info-toggle-btn" id="infoToggleBtn" title="Toggle Instructions">?</button>
-                    <div class="instructions-popup" id="instructionsPopup">
+                    <div class="popup-menu instructions-popup hidden" id="instructionsPopup">
                         <select class="lang-select" id="langSelector">
                             <option value="en" selected>English</option>
                             <option value="es">Español</option>
@@ -498,71 +723,118 @@
                             <option value="zh">中文</option>
                         </select>
                         <div id="instructionsText">
-                            <strong>Instructions:</strong> Tap or click precisely anywhere inside the lens to instantly jump the magnifier center to that pixel spot. Drag the handle or lens to pan. Use the zoom slider or mouse wheel over the lens to scale. Click codes to copy values.
+                            <strong>User Guide & Instructions:</strong><br><br>
+                            • <strong>LOAD Menu:</strong> Click the red <strong>LOAD</strong> button at the bottom right to upload a local image file, generate an interactive chromatic color spectrum, or import an image directly via URL.<br><br>
+                            • <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the magnifier lens to smoothly pan across the canvas. Releasing the drag preserves your exact position without unwanted jumps.<br><br>
+                            • <strong>Zoom Controls:</strong> Use your mouse scroll wheel over the lens/zoom slider, adjust the slider input, or click the <strong>100%</strong> button to instantly scale up to 30x magnification.<br><br>
+                            • <strong>Color Sampling:</strong> Click any pixel location to lock its precise HEX and RGB values into the top readout cards. Click either code card to instantly copy it to your clipboard.<br><br>
+                            • <strong>Handle Toggle:</strong> Enable the physical lens handle using the checkbox below to drag by the handle bar instead of the center glass.
                         </div>
+                        <label class="handle-toggle-label">
+                            <input type="checkbox" id="handleToggleCheckbox" checked>
+                            <span id="showHandleLabelText">Show lens handle</span>
+                        </label>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="magnifierWrapper">
+        <div class="lens-body-container" id="lensBodyContainer">
+            <canvas id="lensCanvas" width="180" height="180"></canvas>
+        </div>
+        <div class="lens-handle" id="lensHandle" title="Drag lens handle (Double-click to reset zoom)"></div>
+    </div>
+
     <footer>
-        <span id="footerTitleSlot"></span>
+        <span id="footerTitleSlot">Precision Color Picker |</span>
         <div class="credits" id="footerCreditsText">Created by KAWN HYPERSYSTEMS</div>
     </footer>
     <div id="toast">Copied to clipboard!</div>
+
     <script>
-        // Copyright Fragment 1 (Hidden in Translation Configuration)
         const translations = {
             en: {
                 title: "Precision Color Picker",
-                chooseImage: "Choose Image",
-                changeImage: "Change Image",
+                chooseImage: "📁 Choose Image",
+                colorSpectrum: "🌈 Color Spectrum",
+                imageUrl: "🔗 Image URL",
                 zoom: "Zoom",
                 dropHint: "Or drag and drop an image here",
                 footerCredits: "Created by KAWN HYPERSYSTEMS",
-                instructions: "<strong>Instructions:</strong> Tap or click precisely anywhere inside the lens to instantly jump the magnifier center to that pixel spot. Drag the handle or lens to pan. Use the zoom slider or mouse wheel over the lens to scale. Click codes to copy values.",
+                instructions: "<strong>User Guide & Instructions:</strong><br><br>• <strong>LOAD Menu:</strong> Click the red <strong>LOAD</strong> button at the bottom right to upload a local image file, generate an interactive chromatic color spectrum, or import an image directly via URL.<br><br>• <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the magnifier lens to smoothly pan across the canvas. Releasing the drag preserves your exact position without unwanted jumps.<br><br>• <strong>Zoom Controls:</strong> Use your mouse scroll wheel over the lens/zoom slider, adjust the slider input, or click the <strong>100%</strong> button to instantly scale up to 30x magnification.<br><br>• <strong>Color Sampling:</strong> Click any pixel location to lock its precise HEX and RGB values into the top readout cards. Click either code card to instantly copy it to your clipboard.<br><br>• <strong>Handle Toggle:</strong> Enable the physical lens handle using the checkbox below to drag by the handle bar instead of the center glass.",
+                showHandle: "Show lens handle",
                 toast: "Copied to clipboard!",
+                urlModalTitle: "Enter Image URL",
+                urlModalPlaceholder: "https://example.com/image.jpg",
+                urlModalCancel: "Cancel",
+                urlModalSubmit: "Load Image",
                 _f1: "CAMA88"
             },
             es: {
                 title: "Selector de Color Preciso",
-                chooseImage: "Elegir Imagen",
-                changeImage: "Cambiar Imagen",
+                chooseImage: "📁 Elegir Imagen",
+                colorSpectrum: "🌈 Espectro de Color",
+                imageUrl: "🔗 URL de Imagen",
                 zoom: "Zoom",
                 dropHint: "O arrastra y suelta una imagen aquí",
                 footerCredits: "Creado por KAWN HYPERSYSTEMS",
-                instructions: "<strong>Instrucciones:</strong> Toque o haga clic con precisión en cualquier lugar dentro de la lente para saltar instantáneamente al píxel. Arrastre el mango o la lente. Use el control deslizante de zoom o la rueda del mouse para escalar. Haga clic en los códigos para copiar.",
-                toast: "¡Copiado al portapapeles!"
+                instructions: "<strong>Guía de Usuario e Instrucciones:</strong><br><br>• <strong>Menú LOAD:</strong> Haga clic en el botón rojo <strong>LOAD</strong> abajo a la derecha para cargar un archivo local, generar un espectro cromático interactivo o importar mediante URL.<br><br>• <strong>Navegación y Arrastre:</strong> Haga clic y arrastre en la vista previa o dentro de la lente para desplazarse con fluidez. Al soltar el arrastre dentro de la lente, se mantiene la posición exacta sin saltos no deseados.<br><br>• <strong>Controles de Zoom:</strong> Use la rueda del ratón sobre la lente, mueva el control deslizante o haga clic en el botón <strong>100%</strong> para escalar hasta 30x.<br><br>• <strong>Inspección de Color:</strong> Haga clic en cualquier píxel para capturar sus códigos HEX y RGB. Haga clic en los cuadros de código para copiarlos al portapapeles.<br><br>• <strong>Asa de Lente:</strong> Active el asa física mediante la casilla inferior si prefiere arrastrar desde el mango.",
+                showHandle: "Mostrar asa de lente",
+                toast: "¡Copiado al portapapeles!",
+                urlModalTitle: "Ingrese URL de la imagen",
+                urlModalPlaceholder: "https://ejemplo.com/imagen.jpg",
+                urlModalCancel: "Cancelar",
+                urlModalSubmit: "Cargar Imagen"
             },
             fr: {
                 title: "Sélecteur de Couleur de Précision",
-                chooseImage: "Choisir une image",
-                changeImage: "Changer l'image",
+                chooseImage: "📁 Choisir une image",
+                colorSpectrum: "🌈 Spectre de Couleurs",
+                imageUrl: "🔗 URL de l'image",
                 zoom: "Zoom",
                 dropHint: "Ou glissez-déposez une image ici",
                 footerCredits: "Créé par KAWN HYPERSYSTEMS",
-                instructions: "<strong>Instructions :</strong> Appuyez ou cliquez précisément n'importe où à l'intérieur de la lentille pour centrer la loupe sur ce pixel. Glissez la poignée ou la lentille. Utilisez le curseur de zoom ou la molette. Cliquez sur les codes pour copier.",
-                toast: "Copié dans le presse-papier !"
+                instructions: "<strong>Guide et Instructions :</strong><br><br>• <strong>Menu LOAD :</strong> Cliquez sur le bouton rouge <strong>LOAD</strong> en bas à droite pour charger une image locale, un spectre de couleurs interactif ou importer via une URL.<br><br>• <strong>Navigation et Glissement :</strong> Cliquez et glissez sur la zone d'affichage ou dans la loupe pour vous déplacer. Le relâchement du glissement à l'intérieur de la loupe conserve la position exacte sans saut inattendu.<br><br>• <strong>Commandes de Zoom :</strong> Utilisez la molette de la souris sur la loupe, le curseur de zoom, ou cliquez sur le bouton <strong>100%</strong> pour zoomer jusqu'à 30x.<br><br>• <strong>Inspection des Couleurs :</strong> Cliquez sur n'importe quel pixel pour figer ses codes HEX et RGB dans les cartes de lecture supérieures et les copier au clic.<br><br>• <strong>Poignée de Loupe :</strong> Activez la poignée physique à l'aide de la case à cocher ci-dessous.",
+                showHandle: "Afficher la poignée",
+                toast: "Copié dans le presse-papier !",
+                urlModalTitle: "Entrer l'URL de l'image",
+                urlModalPlaceholder: "https://exemple.com/image.jpg",
+                urlModalCancel: "Annuler",
+                urlModalSubmit: "Charger"
             },
             de: {
                 title: "Präziser Farbwähler",
-                chooseImage: "Bild auswählen",
-                changeImage: "Bild ändern",
+                chooseImage: "📁 Bild auswählen",
+                colorSpectrum: "🌈 Farbspektrum",
+                imageUrl: "🔗 Bild-URL",
                 zoom: "Zoom",
                 dropHint: "Oder Bild hierher ziehen und ablegen",
                 footerCredits: "Erstellt von KAWN HYPERSYSTEMS",
-                instructions: "<strong>Anleitung:</strong> Tippen oder klicken Sie präzise in die Lupe, um direkt zu diesem Pixel zu springen. Ziehen Sie den Griff oder die Lupe zum Verschieben. Verwenden Sie den Zoom-Schieberegler oder das Mausrad. Codes zum Kopieren anklicken.",
-                toast: "In die Zwischenablage kopiert!"
+                instructions: "<strong>Benutzerhandbuch & Anleitung:</strong><br><br>• <strong>LOAD-Menü:</strong> Klicken Sie unten rechts auf den roten <strong>LOAD</strong>-Button, um eine lokale Bilddatei hochzuladen, ein Farbspektrum zu generieren oder eine Bild-URL einzugeben.<br><br>• <strong>Lupen-Navigation & Ziehen:</strong> Klicken und ziehen Sie im Bildbereich oder in der Lupe, um sich flüssig zu bewegen. Das Loslassen des Ziehens innerhalb der Lupe behält die exakte Position bei.<br><br>• <strong>Zoom-Steuerung:</strong> Nutzen Sie das Mausrad über der Lupe, den Schieberegler oder die <strong>100%</strong>-Schaltfläche für bis zu 30-fache Vergrößerung.<br><br>• <strong>Farbauswahl:</strong> Klicken Sie auf einen beliebigen Pixel, um die HEX- und RGB-Werte anzuzeigen und per Klick in die Zwischenablage zu kopieren.<br><br>• <strong>Linsengriff:</strong> Aktivieren Sie den physischen Griff über das Kontrollkästchen.",
+                showHandle: "Linsengriff anzeigen",
+                toast: "In die Zwischenablage kopiert!",
+                urlModalTitle: "Bild-URL eingeben",
+                urlModalPlaceholder: "https://beispiel.de/bild.jpg",
+                urlModalCancel: "Abbrechen",
+                urlModalSubmit: "Laden"
             },
             zh: {
                 title: "精密取色器",
-                chooseImage: "选择图片",
-                changeImage: "更换图片",
-                zoom: "缩放",
+                chooseImage: "📁 选择图片",
+                colorSpectrum: "🌈 色彩光谱",
+                imageUrl: "🔗 图片网址",
+                zoom: "Zoom",
                 dropHint: "或将图片拖放至此处",
                 footerCredits: "由 KAWN HYPERSYSTEMS 创建",
-                instructions: "<strong>说明：</strong> 在透镜内任意位置精确点击或轻触，即可将放大镜中心跳转到该像素点。拖动手柄或透镜进行平移。使用缩放滑块或鼠标滚轮进行缩放。点击代码框可复制数值。",
-                toast: "已复制到剪贴板！"
+                instructions: "<strong>使用指南与说明：</strong><br><br>• <strong>LOAD 菜单：</strong> 点击右下角红色的 <strong>LOAD</strong> 按钮以上传本地图像、生成交互式色彩光谱或通过网址导入图像。<br><br>• <strong>透镜导航与拖动：</strong> 直接在图像视口或透镜内部点击并拖动以平移画布。在透镜内部释放拖动时可保留当前精确位置，不会产生跳动。<br><br>• <strong>缩放控制：</strong> 在透镜上滚动鼠标滚轮、调整滑块输入，或点击 <strong>100%</strong> 按钮进行最高 30 倍放大。<br><br>• <strong>颜色取样：</strong> 点击任意像素位置即可将其 HEX 和 RGB 代码锁定至顶部面板，点击代码块可直接复制到剪贴板。<br><br>• <strong>镜头手柄：</strong> 使用下方的复选框启用物理镜头手柄进行拖动。",
+                showHandle: "显示镜头手柄",
+                toast: "已复制到剪贴板！",
+                urlModalTitle: "输入图片网址",
+                urlModalPlaceholder: "https://example.com/image.jpg",
+                urlModalCancel: "取消",
+                urlModalSubmit: "加载图片"
             }
         };
 
@@ -570,25 +842,26 @@
         const appWorkspace = document.getElementById('appWorkspace');
         const imageLoaderInitial = document.getElementById('imageLoaderInitial');
         const imageLoaderActive = document.getElementById('imageLoaderActive');
+        const chooseSpectrumInitial = document.getElementById('chooseSpectrumInitial');
+        const chooseUrlInitial = document.getElementById('chooseUrlInitial');
         const canvas = document.getElementById('imageCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const lensCanvas = document.getElementById('lensCanvas');
         const lensCtx = lensCanvas.getContext('2d');
         const canvasContainer = document.getElementById('canvasContainer');
+        const canvasViewport = document.getElementById('canvasViewport');
         const magnifierWrapper = document.getElementById('magnifierWrapper');
         const lensHandle = document.getElementById('lensHandle');
-        const controlPanelGroup = document.getElementById('controlPanelGroup');
         const hexCode = document.getElementById('hexCode');
         const rgbCode = document.getElementById('rgbCode');
         const zoomSlider = document.getElementById('zoomSlider');
+        const zoom100Btn = document.getElementById('zoom100Btn');
         const infoToggleBtn = document.getElementById('infoToggleBtn');
         const instructionsPopup = document.getElementById('instructionsPopup');
         const instructionsText = document.getElementById('instructionsText');
         const initialTitleText = document.getElementById('initialTitleText');
         const titleLensIcon = document.getElementById('titleLensIcon');
-        const titleHeaderWrapper = document.getElementById('titleHeaderWrapper');
         const chooseImageBtnText = document.getElementById('chooseImageBtnText');
-        const changeImageBtnText = document.getElementById('changeImageBtnText');
         const zoomLabelText = document.getElementById('zoomLabelText');
         const dropHintText = document.getElementById('dropHintText');
         const footerCreditsText = document.getElementById('footerCreditsText');
@@ -597,31 +870,45 @@
         const initialLangSelector = document.getElementById('initialLangSelector');
         const toast = document.getElementById('toast');
         const dropContainer = document.getElementById('dropContainer');
+        const splashOverlay = document.getElementById('splashOverlay');
+        const handleToggleCheckbox = document.getElementById('handleToggleCheckbox');
+        const showHandleLabelText = document.getElementById('showHandleLabelText');
+
+        const urlModalOverlay = document.getElementById('urlModalOverlay');
+        const modalTitleText = document.getElementById('modalTitleText');
+        const urlModalInput = document.getElementById('urlModalInput');
+        const urlModalCancel = document.getElementById('urlModalCancel');
+        const urlModalSubmit = document.getElementById('urlModalSubmit');
+
+        const loadMenuToggleBtn = document.getElementById('loadMenuToggleBtn');
+        const loadMenuPopup = document.getElementById('loadMenuPopup');
+        const menuChooseImage = document.getElementById('menuChooseImage');
+        const menuColorSpectrum = document.getElementById('menuColorSpectrum');
+        const menuImageUrl = document.getElementById('menuImageUrl');
 
         let img = new Image();
         let currentCanvasX = 0, currentCanvasY = 0;
         let isDraggingLens = false;
+        let hasMovedDuringDrag = false;
         let dragOffsetX = 0, dragOffsetY = 0;
-        let currentZoom = 1.5;
+        let currentZoom = 1;
+        let defaultFitZoom = 1;
+        let minZoom = 1;
+        let maxZoom = 30;
         let animationFrameId = null;
         let currentLang = 'en';
-        let isFirstLoad = true; // Tracks whether to run splash animation
+        let isFirstLoad = true;
+        let pendingRAF = null;
+        let isAnimatingOrLoading = false;
 
-        // Copyright Fragment 2 (Hidden in configuration registry)
-        const SYSTEM_CONFIG = {
-            _f2: "0831"
-        };
-
-        // Copyright Fragment 3 (Hidden as Constant Salt)
+        const SYSTEM_CONFIG = { _f2: "0831" };
         const RUNTIME_SALT = "HDFNH0";
 
-        // Integrity Verification Routine
         function verifyIntegrity() {
             try {
                 let f1 = translations.en._f1;
                 let f2 = SYSTEM_CONFIG._f2;
                 let f3 = RUNTIME_SALT;
-                
                 if ((f1 + f2 + f3) !== "CAMA880831HDFNH0") {
                     throw new Error("Integrity violation");
                 }
@@ -630,7 +917,6 @@
                 throw new Error("Execution halted.");
             }
         }
-
         verifyIntegrity();
 
         function setLanguage(lang) {
@@ -639,185 +925,303 @@
             initialLangSelector.value = lang;
             const t = translations[currentLang];
             initialTitleText.innerText = t.title;
-            chooseImageBtnText.childNodes[0].nodeValue = t.chooseImage + " ";
-            changeImageBtnText.childNodes[0].nodeValue = t.changeImage + " ";
+            chooseImageBtnText.childNodes[1].nodeValue = " " + t.chooseImage;
+            chooseSpectrumInitial.innerText = t.colorSpectrum;
+            chooseUrlInitial.innerText = t.imageUrl;
             zoomLabelText.innerText = t.zoom;
             dropHintText.innerText = t.dropHint;
             footerCreditsText.innerText = t.footerCredits;
             instructionsText.innerHTML = t.instructions;
+            showHandleLabelText.innerText = t.showHandle;
             toast.innerText = t.toast;
-            if (footerTitleSlot.innerText) {
-                footerTitleSlot.innerText = t.title + " |";
-            }
+            footerTitleSlot.innerText = t.title + " |";
+            menuChooseImage.innerText = t.chooseImage;
+            menuColorSpectrum.innerText = t.colorSpectrum;
+            menuImageUrl.innerText = t.imageUrl;
+            modalTitleText.innerText = t.urlModalTitle;
+            urlModalInput.placeholder = t.urlModalPlaceholder;
+            urlModalCancel.innerText = t.urlModalCancel;
+            urlModalSubmit.innerText = t.urlModalSubmit;
         }
 
-        langSelector.addEventListener('change', (e) => {
-            setLanguage(e.target.value);
-        });
+        langSelector.addEventListener('change', (e) => setLanguage(e.target.value));
+        initialLangSelector.addEventListener('change', (e) => setLanguage(e.target.value));
 
-        initialLangSelector.addEventListener('change', (e) => {
-            setLanguage(e.target.value);
+        handleToggleCheckbox.addEventListener('change', (e) => {
+            lensHandle.style.display = e.target.checked ? 'block' : 'none';
         });
 
         infoToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            instructionsPopup.classList.toggle('active');
+            loadMenuPopup.classList.add('hidden');
+            instructionsPopup.classList.toggle('hidden');
         });
-        window.addEventListener('click', () => {
-            instructionsPopup.classList.remove('active');
-        });
-        instructionsPopup.addEventListener('click', (e) => {
+
+        loadMenuToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            instructionsPopup.classList.add('hidden');
+            loadMenuPopup.classList.toggle('hidden');
         });
 
-        function animateTitleToFooter() {
-            const titleRect = initialTitleText.getBoundingClientRect();
-            const lensRect = titleLensIcon.getBoundingClientRect();
-            
-            footerTitleSlot.innerText = translations[currentLang].title + " |";
-            const endTitleRect = footerTitleSlot.getBoundingClientRect();
-            footerTitleSlot.innerText = "";
+        window.addEventListener('click', (e) => {
+            if (!instructionsPopup.contains(e.target) && e.target !== infoToggleBtn) {
+                instructionsPopup.classList.add('hidden');
+            }
+            if (!loadMenuToggleBtn.contains(e.target) && !loadMenuPopup.contains(e.target)) {
+                loadMenuPopup.classList.add('hidden');
+            }
+        });
+        instructionsPopup.addEventListener('click', (e) => e.stopPropagation());
+        loadMenuPopup.addEventListener('click', (e) => e.stopPropagation());
 
-            initialScreen.style.display = 'none';
-            appWorkspace.style.display = 'flex';
-            currentCanvasX = img.width / 2;
-            currentCanvasY = img.height / 2;
-            
-            const rect = canvas.getBoundingClientRect();
-            const containerRect = canvasContainer.getBoundingClientRect();
-            const targetLensLeft = (rect.left - containerRect.left) + (currentCanvasX * (rect.width / canvas.width));
-            const targetLensTop = (rect.top - containerRect.top) + (currentCanvasY * (rect.height / canvas.height));
+        function openUrlModal(callback) {
+            urlModalInput.value = "";
+            urlModalOverlay.classList.add('active');
+            urlModalInput.focus();
 
-            const titleFlyer = document.createElement('div');
-            titleFlyer.className = 'flying-title';
-            titleFlyer.innerText = translations[currentLang].title;
-            titleFlyer.style.background = window.getComputedStyle(initialTitleText).background;
-            titleFlyer.style.webkitBackgroundClip = 'text';
-            titleFlyer.style.webkitTextFillColor = 'transparent';
-            titleFlyer.style.left = titleRect.left + 'px';
-            titleFlyer.style.top = titleRect.top + 'px';
-            titleFlyer.style.fontSize = window.getComputedStyle(initialTitleText).fontSize;
-            document.body.appendChild(titleFlyer);
+            const onSubmit = () => {
+                const val = urlModalInput.value.trim();
+                cleanup();
+                if (val && callback) callback(val);
+            };
 
-            const lensMorpher = document.createElement('div');
-            lensMorpher.style.position = 'fixed';
-            lensMorpher.style.zIndex = '99999';
-            lensMorpher.style.pointerEvents = 'none';
-            lensMorpher.style.width = '70px';
-            lensMorpher.style.height = '95px';
-            lensMorpher.style.left = lensRect.left + 'px';
-            lensMorpher.style.top = lensRect.top + 'px';
-            lensMorpher.style.transformOrigin = 'top center';
-            lensMorpher.style.transition = 'all 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
+            const onCancel = () => {
+                cleanup();
+            };
 
-            const morpherBody = document.createElement('div');
-            morpherBody.style.width = '70px';
-            morpherBody.style.height = '70px';
-            morpherBody.style.borderRadius = '50%';
-            morpherBody.style.background = '#000';
-            morpherBody.style.border = '4px solid #aa0000';
-            morpherBody.style.boxShadow = '0 0 15px rgba(170, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.6)';
-            lensMorpher.appendChild(morpherBody);
+            const onKeyDown = (e) => {
+                if (e.key === 'Enter') onSubmit();
+                if (e.key === 'Escape') onCancel();
+            };
 
-            const morpherHandle = document.createElement('div');
-            morpherHandle.style.position = 'absolute';
-            morpherHandle.style.bottom = '0';
-            morpherHandle.style.left = '50%';
-            morpherHandle.style.transform = 'translateX(-50%)';
-            morpherHandle.style.width = '12px';
-            morpherHandle.style.height = '25px';
-            morpherHandle.style.background = 'linear-gradient(135deg, #333 0%, #111 100%)';
-            morpherHandle.style.border = '2px solid #555';
-            morpherHandle.style.borderRadius = '0 0 6px 6px';
-            lensMorpher.appendChild(morpherHandle);
+            function cleanup() {
+                urlModalOverlay.classList.remove('active');
+                urlModalSubmit.removeEventListener('click', onSubmit);
+                urlModalCancel.removeEventListener('click', onCancel);
+                urlModalInput.removeEventListener('keydown', onKeyDown);
+            }
 
-            document.body.appendChild(lensMorpher);
+            urlModalSubmit.addEventListener('click', onSubmit);
+            urlModalCancel.addEventListener('click', onCancel);
+            urlModalInput.addEventListener('keydown', onKeyDown);
+        }
 
-            titleHeaderWrapper.style.visibility = 'hidden';
+        menuChooseImage.addEventListener('click', () => {
+            loadMenuPopup.classList.add('hidden');
+            imageLoaderActive.click();
+        });
 
-            titleFlyer.getBoundingClientRect();
-            lensMorpher.getBoundingClientRect();
+        menuColorSpectrum.addEventListener('click', () => {
+            loadMenuPopup.classList.add('hidden');
+            loadColorSpectrum();
+        });
 
-            const titleScale = endTitleRect.height / titleRect.height;
-            const titleDeltaX = endTitleRect.left - titleRect.left;
-            const titleDeltaY = endTitleRect.top - titleRect.top;
-            titleFlyer.style.transform = `translate(${titleDeltaX}px, ${titleDeltaY}px) scale(${titleScale})`;
+        menuImageUrl.addEventListener('click', () => {
+            loadMenuPopup.classList.add('hidden');
+            openUrlModal((url) => loadImageUrl(url));
+        });
 
-            const finalGlobalX = containerRect.left + targetLensLeft;
-            const finalGlobalY = containerRect.top + targetLensTop - 80;
-            const lensScale = 160 / 70;
-            const lensDeltaX = finalGlobalX - lensRect.left - (160 / 2) + (70 / 2);
-            const lensDeltaY = finalGlobalY - lensRect.top;
-            lensMorpher.style.transform = `translate(${lensDeltaX}px, ${lensDeltaY}px) scale(${lensScale})`;
+        chooseUrlInitial.addEventListener('click', () => {
+            openUrlModal((url) => loadImageUrl(url));
+        });
 
-            setTimeout(() => {
-                titleFlyer.remove();
-                lensMorpher.remove();
-                footerTitleSlot.innerText = translations[currentLang].title + " |";
+        function calculateFitZoom() {
+            const viewportRect = canvasViewport.getBoundingClientRect();
+            const vW = viewportRect.width - 20;
+            const vH = viewportRect.height - 20;
+            const scaleX = vW / img.width;
+            const scaleY = vH / img.height;
+            defaultFitZoom = Math.max(0.1, Math.min(scaleX, scaleY));
+            minZoom = defaultFitZoom;
+            zoomSlider.min = minZoom;
+            zoomSlider.max = maxZoom;
+            zoomSlider.step = "0.1";
+        }
+
+        function triggerLoadTransition(onComplete) {
+            isAnimatingOrLoading = true;
+            if (isFirstLoad) {
+                isFirstLoad = false;
+                const startRect = titleLensIcon.getBoundingClientRect();
+                initialScreen.style.display = 'none';
                 
-                appWorkspace.classList.add('visible');
-                controlPanelGroup.style.visibility = 'visible';
-                updateMagnifierPosition();
-            }, 1200);
+                const flyer = document.createElement('div');
+                flyer.id = 'flyingLogoContainer';
+                flyer.style.width = '80px';
+                flyer.style.height = '100px';
+                flyer.style.left = startRect.left + 'px';
+                flyer.style.top = startRect.top + 'px';
+
+                const circle = document.createElement('div');
+                circle.id = 'flyerCircle';
+                circle.style.width = '80px';
+                circle.style.height = '80px';
+                circle.style.borderRadius = '50%';
+                circle.style.background = '#000';
+                circle.style.border = '8px solid #ff0000';
+                circle.style.boxSizing = 'border-box';
+                circle.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7)';
+                flyer.appendChild(circle);
+
+                const handle = document.createElement('div');
+                handle.style.position = 'absolute';
+                handle.style.bottom = '0';
+                handle.style.left = '50%';
+                handle.style.transform = 'translateX(-50%)';
+                handle.style.width = '10px';
+                handle.style.height = '25px';
+                handle.style.background = 'linear-gradient(135deg, #333333 0%, #111111 100%)';
+                handle.style.border = '2px solid #555555';
+                handle.style.borderRadius = '0 0 6px 6px';
+                flyer.appendChild(handle);
+
+                document.body.appendChild(flyer);
+
+                appWorkspace.style.display = 'flex';
+                if (onComplete) onComplete();
+
+                const tempX = canvas.width / 2;
+                const tempY = canvas.height / 2;
+                const rect = canvas.getBoundingClientRect();
+                const finalTargetLeft = rect.left + (tempX * (rect.width / canvas.width));
+                const finalTargetTop = rect.top + (tempY * (rect.height / canvas.height));
+
+                const targetX = finalTargetLeft - 40; 
+                const targetY = finalTargetTop - 40; 
+
+                flyer.getBoundingClientRect();
+                flyer.style.transform = `translate(${targetX - startRect.left}px, ${targetY - startRect.top}px) scale(2.25)`;
+
+                setTimeout(() => {
+                    circle.classList.add('pulsating');
+                }, 840);
+
+                setTimeout(() => { splashOverlay.style.opacity = '1'; }, 1890);
+
+                setTimeout(() => {
+                    splashOverlay.style.opacity = '0';
+                    flyer.remove();
+                    appWorkspace.classList.add('visible');
+                    isAnimatingOrLoading = false;
+                    updateMagnifierPosition();
+                }, 2310);
+            } else {
+                splashOverlay.style.opacity = '1';
+                setTimeout(() => {
+                    if (onComplete) onComplete();
+                    splashOverlay.style.opacity = '0';
+                    isAnimatingOrLoading = false;
+                    updateMagnifierPosition();
+                }, 300);
+            }
         }
 
         function loadImageFile(file) {
             if (!file || !file.type.startsWith('image/')) return;
+            isAnimatingOrLoading = true;
             const reader = new FileReader();
             reader.onload = function(event) {
                 img.onload = function() {
-                    if (isFirstLoad) {
-                        isFirstLoad = false;
+                    triggerLoadTransition(() => {
                         canvas.width = img.width;
                         canvas.height = img.height;
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(img, 0, 0);
-                        animateTitleToFooter();
-                    } else {
-                        // Subsequent loads update instantly without animation
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0);
+                        calculateFitZoom();
+                        currentZoom = defaultFitZoom;
                         currentCanvasX = img.width / 2;
                         currentCanvasY = img.height / 2;
                         updateMagnifierPosition();
-                    }
+                    });
                 };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        imageLoaderInitial.addEventListener('change', (e) => {
-            if (e.target.files[0]) loadImageFile(e.target.files[0]);
-        });
-        imageLoaderActive.addEventListener('change', (e) => {
-            if (e.target.files[0]) loadImageFile(e.target.files[0]);
-        });
+        function loadImageUrl(url) {
+            isAnimatingOrLoading = true;
+            const tempImg = new Image();
+            tempImg.crossOrigin = "Anonymous";
+            tempImg.onload = function() {
+                img.src = url;
+                triggerLoadTransition(() => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    calculateFitZoom();
+                    currentZoom = defaultFitZoom;
+                    currentCanvasX = img.width / 2;
+                    currentCanvasY = img.height / 2;
+                    updateMagnifierPosition();
+                });
+            };
+            tempImg.onerror = function() {
+                isAnimatingOrLoading = false;
+                alert("Failed to load image from URL (CORS or invalid link).");
+            };
+            tempImg.src = url;
+        }
+
+        function loadColorSpectrum() {
+            isAnimatingOrLoading = true;
+            const specCanvas = document.createElement('canvas');
+            specCanvas.width = 1200;
+            specCanvas.height = 800;
+            const sCtx = specCanvas.getContext('2d');
+
+            const hGradient = sCtx.createLinearGradient(0, 0, specCanvas.width, 0);
+            hGradient.addColorStop(0, 'red');
+            hGradient.addColorStop(1/6, 'yellow');
+            hGradient.addColorStop(2/6, 'lime');
+            hGradient.addColorStop(3/6, 'cyan');
+            hGradient.addColorStop(4/6, 'blue');
+            hGradient.addColorStop(5/6, 'magenta');
+            hGradient.addColorStop(1, 'red');
+            sCtx.fillStyle = hGradient;
+            sCtx.fillRect(0, 0, specCanvas.width, specCanvas.height);
+
+            const vGradient = sCtx.createLinearGradient(0, 0, 0, specCanvas.height);
+            vGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            vGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+            vGradient.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
+            vGradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
+            sCtx.fillStyle = vGradient;
+            sCtx.fillRect(0, 0, specCanvas.width, specCanvas.height);
+
+            img.onload = function() {
+                triggerLoadTransition(() => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    calculateFitZoom();
+                    currentZoom = defaultFitZoom;
+                    currentCanvasX = img.width / 2;
+                    currentCanvasY = img.height / 2;
+                    updateMagnifierPosition();
+                });
+            };
+            img.src = specCanvas.toDataURL('image/png');
+        }
+
+        imageLoaderInitial.addEventListener('change', (e) => { if (e.target.files[0]) loadImageFile(e.target.files[0]); });
+        imageLoaderActive.addEventListener('change', (e) => { if (e.target.files[0]) loadImageFile(e.target.files[0]); });
+        chooseSpectrumInitial.addEventListener('click', loadColorSpectrum);
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropContainer.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropContainer.classList.add('drag-over');
-            }, false);
+            dropContainer.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); dropContainer.classList.add('drag-over'); }, false);
         });
-
         ['dragleave', 'drop'].forEach(eventName => {
-            dropContainer.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropContainer.classList.remove('drag-over');
-            }, false);
+            dropContainer.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); dropContainer.classList.remove('drag-over'); }, false);
         });
-
         dropContainer.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files && files.length > 0) {
-                loadImageFile(files[0]);
-            }
+            e.preventDefault();
+            e.stopPropagation();
+            dropContainer.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) loadImageFile(files[0]);
         }, false);
 
         function getCanvasPosFromClient(clientX, clientY) {
@@ -829,11 +1233,10 @@
         }
 
         function updateMagnifierPosition() {
-            if (!img.src) return;
+            if (!img.src || isAnimatingOrLoading) return;
             const rect = canvas.getBoundingClientRect();
-            const containerRect = canvasContainer.getBoundingClientRect();
-            const leftPx = (rect.left - containerRect.left) + (currentCanvasX * (rect.width / canvas.width));
-            const topPx = (rect.top - containerRect.top) + (currentCanvasY * (rect.height / canvas.height));
+            const leftPx = rect.left + (currentCanvasX * (rect.width / canvas.width));
+            const topPx = rect.top + (currentCanvasY * (rect.height / canvas.height));
             magnifierWrapper.style.display = 'block';
             magnifierWrapper.style.left = `${leftPx}px`;
             magnifierWrapper.style.top = `${topPx}px`;
@@ -852,39 +1255,45 @@
         function drawLens(targetX, targetY, zoom) {
             const lensSize = lensCanvas.width;
             lensCtx.clearRect(0, 0, lensSize, lensSize);
+            
+            if (isAnimatingOrLoading) {
+                lensCtx.fillStyle = '#000000';
+                lensCtx.fillRect(0, 0, lensSize, lensSize);
+                return;
+            }
+
             const sourceWidth = lensSize / zoom;
             lensCtx.imageSmoothingEnabled = zoom < 8;
             lensCtx.drawImage(canvas, targetX - sourceWidth / 2, targetY - sourceWidth / 2, sourceWidth, sourceWidth, 0, 0, lensSize, lensSize);
 
-            const intX = Math.floor(targetX);
-            const intY = Math.floor(targetY);
+            const intX = Math.min(canvas.width - 1, Math.max(0, Math.floor(targetX)));
+            const intY = Math.min(canvas.height - 1, Math.max(0, Math.floor(targetY)));
             let hex = "#000000";
-            if (intX >= 0 && intY >= 0 && intX < canvas.width && intY < canvas.height) {
-                const pixel = ctx.getImageData(intX, intY, 1, 1).data;
-                hex = "#" + ((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1).toUpperCase();
-            }
+            const pixel = ctx.getImageData(intX, intY, 1, 1).data;
+            hex = "#" + ((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1).toUpperCase();
 
             const centerX = lensSize / 2;
             const centerY = lensSize / 2;
+            const ringThickness = lensSize * 0.1171875;
             lensCtx.beginPath();
-            lensCtx.arc(centerX, centerY, 72.5, 0, 2 * Math.PI);
+            lensCtx.arc(centerX, centerY, (lensSize / 2) - (ringThickness / 2), 0, 2 * Math.PI);
             lensCtx.strokeStyle = hex;
-            lensCtx.lineWidth = 15;
+            lensCtx.lineWidth = ringThickness;
             lensCtx.stroke();
 
-            const centerPixel = ctx.getImageData(Math.max(0, Math.min(canvas.width - 1, intX)), Math.max(0, Math.min(canvas.height - 1, intY)), 1, 1).data;
-            lensCtx.fillStyle = `rgb(${255 - centerPixel[0]}, ${255 - centerPixel[1]}, ${255 - centerPixel[2]})`;
+            lensCtx.fillStyle = `rgb(${255 - pixel[0]}, ${255 - pixel[1]}, ${255 - pixel[2]})`;
             lensCtx.beginPath();
             lensCtx.arc(centerX, centerY, Math.max(2, zoom / 3), 0, 2 * Math.PI);
             lensCtx.fill();
-            lensCtx.strokeStyle = `rgb(${centerPixel[0]}, ${centerPixel[1]}, ${centerPixel[2]})`;
+            lensCtx.strokeStyle = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
             lensCtx.lineWidth = 1;
             lensCtx.stroke();
         }
 
         function pickColor(x, y) {
-            const intX = Math.floor(x), intY = Math.floor(y);
-            if (intX < 0 || intY < 0 || intX >= canvas.width || intY >= canvas.height) return;
+            if (isAnimatingOrLoading) return;
+            const intX = Math.min(canvas.width - 1, Math.max(0, Math.floor(x)));
+            const intY = Math.min(canvas.height - 1, Math.max(0, Math.floor(y)));
             const [r, g, b] = ctx.getImageData(intX, intY, 1, 1).data;
             const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
             
@@ -899,16 +1308,27 @@
 
         zoomSlider.addEventListener('input', (e) => {
             currentZoom = parseFloat(e.target.value);
+            if (pendingRAF) cancelAnimationFrame(pendingRAF);
+            pendingRAF = requestAnimationFrame(() => updateMagnifierPosition());
+        });
+
+        zoom100Btn.addEventListener('click', () => {
+            currentZoom = 1;
             updateMagnifierPosition();
         });
 
-        lensCanvas.addEventListener('wheel', (e) => {
+        function handleZoomWheel(e) {
             e.preventDefault();
-            currentZoom = e.deltaY > 0 ? Math.max(1, parseFloat((currentZoom - 0.5).toFixed(1))) : Math.min(30, parseFloat((currentZoom + 0.5).toFixed(1)));
-            updateMagnifierPosition();
-        }, { passive: false });
+            currentZoom = e.deltaY > 0 ? Math.max(minZoom, parseFloat((currentZoom - 0.5).toFixed(1))) : Math.min(maxZoom, parseFloat((currentZoom + 0.5).toFixed(1)));
+            if (pendingRAF) cancelAnimationFrame(pendingRAF);
+            pendingRAF = requestAnimationFrame(() => updateMagnifierPosition());
+        }
+
+        lensCanvas.addEventListener('wheel', handleZoomWheel, { passive: false });
+        lensHandle.addEventListener('wheel', handleZoomWheel, { passive: false });
 
         lensCanvas.addEventListener('click', (e) => {
+            if (hasMovedDuringDrag) return; // Prevent snap/jump on completing a drag action
             const rect = lensCanvas.getBoundingClientRect();
             const clickOffsetX = e.clientX - rect.left - (rect.width / 2);
             const clickOffsetY = e.clientY - rect.top - (rect.height / 2);
@@ -928,26 +1348,44 @@
 
         function startLensDrag(clientX, clientY) {
             isDraggingLens = true;
+            hasMovedDuringDrag = false;
             const pos = getCanvasPosFromClient(clientX, clientY);
             dragOffsetX = pos.x - currentCanvasX;
             dragOffsetY = pos.y - currentCanvasY;
         }
 
-        lensHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); startLensDrag(e.clientX, e.clientY); });
-        lensHandle.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); startLensDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+        lensHandle.addEventListener('mousedown', (e) => { 
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            startLensDrag(e.clientX, e.clientY); 
+        });
+        lensHandle.addEventListener('touchstart', (e) => { 
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            startLensDrag(e.touches[0].clientX, e.touches[0].clientY); 
+        }, { passive: false });
 
-        lensCanvas.addEventListener('mousedown', (e) => {
+        lensHandle.addEventListener('dblclick', (e) => {
             e.stopPropagation();
-            startLensDrag(e.clientX, e.clientY);
+            e.preventDefault();
+            currentZoom = defaultFitZoom;
+            updateMagnifierPosition();
         });
 
-        lensCanvas.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-            startLensDrag(e.touches[0].clientX, e.touches[0].clientY);
-        }, { passive: true });
+        lensCanvas.addEventListener('mousedown', (e) => { 
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            startLensDrag(e.clientX, e.clientY); 
+        });
+        lensCanvas.addEventListener('touchstart', (e) => { 
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            startLensDrag(e.touches[0].clientX, e.touches[0].clientY); 
+        }, { passive: false });
 
         window.addEventListener('mousemove', (e) => {
             if (!isDraggingLens || !img.src) return;
+            hasMovedDuringDrag = true;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(() => {
                 const pos = getCanvasPosFromClient(e.clientX, e.clientY);
@@ -959,6 +1397,7 @@
 
         window.addEventListener('touchmove', (e) => {
             if (!isDraggingLens || !img.src) return;
+            hasMovedDuringDrag = true;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(() => {
                 const pos = getCanvasPosFromClient(e.touches[0].clientX, e.touches[0].clientY);
@@ -970,7 +1409,7 @@
 
         window.addEventListener('mouseup', () => { isDraggingLens = false; });
         window.addEventListener('touchend', () => { isDraggingLens = false; });
-        window.addEventListener('resize', () => { if (img.src) updateMagnifierPosition(); });
+        window.addEventListener('resize', () => { if (img.src) { calculateFitZoom(); updateMagnifierPosition(); } });
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text.split(': ')[1]).then(() => {
