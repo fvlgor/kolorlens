@@ -106,7 +106,7 @@
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: #000;
+            background: rgba(0, 0, 0, 0.4);
             border: 8px solid #ff0000;
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7);
             position: absolute;
@@ -158,6 +158,7 @@
             outline: 1px solid rgba(0, 0, 0, 0.5);
             text-decoration: none;
             box-sizing: border-box;
+            pointer-events: auto; /* Ensure clickable */
         }
         .action-btn-large:hover { opacity: 0.9; }
 
@@ -172,6 +173,7 @@
             cursor: pointer;
             width: 160px;
             text-align: center;
+            pointer-events: auto;
         }
 
         .app-workspace {
@@ -198,6 +200,8 @@
             align-items: center;
             flex-wrap: wrap;
             flex-shrink: 0;
+            z-index: 60; /* Higher than lens wrapper so codes are click-through / accessible */
+            position: relative;
         }
 
         .top-toolbar {
@@ -215,6 +219,7 @@
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
+            pointer-events: auto; /* Click-through safety explicitly enabled */
         }
 
         .code-box {
@@ -228,6 +233,7 @@
             transition: filter 0.2s;
             text-align: center;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            pointer-events: auto;
         }
         .code-box:hover { filter: brightness(1.2); }
 
@@ -236,6 +242,7 @@
             gap: 8px;
             align-items: center;
             position: relative;
+            pointer-events: auto;
         }
 
         .load-dropdown-container {
@@ -256,6 +263,7 @@
             white-space: nowrap;
             border: 1px solid rgba(255, 255, 255, 0.2);
             outline: 1px solid rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
         }
         .load-menu-btn:hover { opacity: 0.9; }
 
@@ -273,6 +281,7 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
             box-sizing: border-box;
             z-index: 100;
+            pointer-events: auto;
         }
         .popup-menu.hidden {
             opacity: 0;
@@ -308,6 +317,7 @@
             text-align: left;
             transition: background 0.2s;
             box-sizing: border-box;
+            pointer-events: auto;
         }
         .popup-menu-item:hover { background: #222222; }
 
@@ -327,6 +337,7 @@
             transition: background 0.2s;
             position: relative;
             z-index: 100;
+            pointer-events: auto;
         }
         .info-toggle-btn:hover { background: #333333; }
 
@@ -368,9 +379,9 @@
 
         #magnifierWrapper {
             position: fixed;
-            pointer-events: none;
+            pointer-events: none; /* Make container pass-through by default */
             transform: translate(-50%, -90px);
-            z-index: 50;
+            z-index: 40; /* Lower than top controls to enable click-through */
             display: none;
             width: 180px;
             height: 180px;
@@ -391,8 +402,8 @@
             border-radius: 50%;
             width: 180px;
             height: 180px;
-            background-color: #000;
-            pointer-events: auto;
+            background-color: transparent; /* Transparent lens background */
+            pointer-events: auto; /* Allows dragging and tapping inside the lens glass */
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7);
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22" stroke="white" stroke-width="2"/><line x1="12" y1="2" x2="12" y2="22" stroke="black" stroke-width="1"/><line x1="2" y1="12" x2="22" y2="12" stroke="white" stroke-width="2"/><line x1="2" y1="12" x2="22" y2="12" stroke="black" stroke-width="1"/></svg>') 12 12, crosshair;
         }
@@ -408,7 +419,7 @@
             border: 2px solid #555555;
             border-radius: 0 0 10px 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.8);
-            pointer-events: auto;
+            pointer-events: auto; /* Draggable handle */
             cursor: grab;
             z-index: 50;
             display: block;
@@ -425,6 +436,9 @@
             width: 100%;
             padding: 6px 0;
             flex-shrink: 0;
+            z-index: 60;
+            position: relative;
+            pointer-events: auto;
         }
 
         .zoom-slider {
@@ -436,6 +450,7 @@
             border-radius: 3px;
             outline: none;
             border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: auto;
         }
         .zoom-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -457,6 +472,7 @@
             font-size: 11px;
             cursor: pointer;
             font-weight: 600;
+            pointer-events: auto;
         }
         .zoom-100-btn:hover { background: #333; }
 
@@ -472,6 +488,7 @@
             outline: none;
             cursor: pointer;
             box-sizing: border-box;
+            pointer-events: auto;
         }
 
         .handle-toggle-label {
@@ -485,6 +502,7 @@
             font-size: 11px;
             color: var(--text);
             user-select: none;
+            pointer-events: auto;
         }
         .handle-toggle-label input {
             cursor: pointer;
@@ -725,7 +743,7 @@
                         <div id="instructionsText">
                             <strong>User Guide & Instructions:</strong><br><br>
                             • <strong>LOAD Menu:</strong> Click the red <strong>LOAD</strong> button at the bottom right to upload a local image file, generate an interactive chromatic color spectrum, or import an image directly via URL.<br><br>
-                            • <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the magnifier lens to smoothly pan across the canvas. Releasing the drag preserves your exact position without unwanted jumps.<br><br>
+                            • <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the transparent magnifier lens to smoothly pan across canvas edges (including upper boundaries).<br><br>
                             • <strong>Zoom Controls:</strong> Use your mouse scroll wheel over the lens/zoom slider, adjust the slider input, or click the <strong>100%</strong> button to instantly scale up to 30x magnification.<br><br>
                             • <strong>Color Sampling:</strong> Click any pixel location to lock its precise HEX and RGB values into the top readout cards. Click either code card to instantly copy it to your clipboard.<br><br>
                             • <strong>Handle Toggle:</strong> Enable the physical lens handle using the checkbox below to drag by the handle bar instead of the center glass.
@@ -763,7 +781,7 @@
                 zoom: "Zoom",
                 dropHint: "Or drag and drop an image here",
                 footerCredits: "Created by KAWN HYPERSYSTEMS",
-                instructions: "<strong>User Guide & Instructions:</strong><br><br>• <strong>LOAD Menu:</strong> Click the red <strong>LOAD</strong> button at the bottom right to upload a local image file, generate an interactive chromatic color spectrum, or import an image directly via URL.<br><br>• <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the magnifier lens to smoothly pan across the canvas. Releasing the drag preserves your exact position without unwanted jumps.<br><br>• <strong>Zoom Controls:</strong> Use your mouse scroll wheel over the lens/zoom slider, adjust the slider input, or click the <strong>100%</strong> button to instantly scale up to 30x magnification.<br><br>• <strong>Color Sampling:</strong> Click any pixel location to lock its precise HEX and RGB values into the top readout cards. Click either code card to instantly copy it to your clipboard.<br><br>• <strong>Handle Toggle:</strong> Enable the physical lens handle using the checkbox below to drag by the handle bar instead of the center glass.",
+                instructions: "<strong>User Guide & Instructions:</strong><br><br>• <strong>LOAD Menu:</strong> Click the red <strong>LOAD</strong> button at the bottom right to upload a local image file, generate an interactive chromatic color spectrum, or import an image directly via URL.<br><br>• <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the transparent magnifier lens to smoothly pan across canvas edges (including upper boundaries).<br><br>• <strong>Zoom Controls:</strong> Use your mouse scroll wheel over the lens/zoom slider, adjust the slider input, or click the <strong>100%</strong> button to instantly scale up to 30x magnification.<br><br>• <strong>Color Sampling:</strong> Click any pixel location to lock its precise HEX and RGB values into the top readout cards. Click either code card to instantly copy it to your clipboard.<br><br>• <strong>Handle Toggle:</strong> Enable the physical lens handle using the checkbox below to drag by the handle bar instead of the center glass.",
                 showHandle: "Show lens handle",
                 toast: "Copied to clipboard!",
                 urlModalTitle: "Enter Image URL",
@@ -780,7 +798,7 @@
                 zoom: "Zoom",
                 dropHint: "O arrastra y suelta una imagen aquí",
                 footerCredits: "Creado por KAWN HYPERSYSTEMS",
-                instructions: "<strong>Guía de Usuario e Instrucciones:</strong><br><br>• <strong>Menú LOAD:</strong> Haga clic en el botón rojo <strong>LOAD</strong> abajo a la derecha para cargar un archivo local, generar un espectro cromático interactivo o importar mediante URL.<br><br>• <strong>Navegación y Arrastre:</strong> Haga clic y arrastre en la vista previa o dentro de la lente para desplazarse con fluidez. Al soltar el arrastre dentro de la lente, se mantiene la posición exacta sin saltos no deseados.<br><br>• <strong>Controles de Zoom:</strong> Use la rueda del ratón sobre la lente, mueva el control deslizante o haga clic en el botón <strong>100%</strong> para escalar hasta 30x.<br><br>• <strong>Inspección de Color:</strong> Haga clic en cualquier píxel para capturar sus códigos HEX y RGB. Haga clic en los cuadros de código para copiarlos al portapapeles.<br><br>• <strong>Asa de Lente:</strong> Active el asa física mediante la casilla inferior si prefiere arrastrar desde el mango.",
+                instructions: "<strong>Guía de Usuario e Instrucciones:</strong><br><br>• <strong>Menú LOAD:</strong> Haga clic en el botón rojo <strong>LOAD</strong> abajo a la derecha para cargar un archivo local, generar un espectro cromático interactivo o importar mediante URL.<br><br>• <strong>Navegación y Arrastre:</strong> Haga clic y arrastre en la vista previa o dentro de la lente transparente para desplazarse con fluidez por todos los bordes (incluyendo el borde superior).<br><br>• <strong>Controles de Zoom:</strong> Use la rueda del ratón sobre la lente, mueva el control deslizante o haga clic en el botón <strong>100%</strong> para escalar hasta 30x.<br><br>• <strong>Inspección de Color:</strong> Haga clic en cualquier píxel para capturar sus códigos HEX y RGB. Haga clic en los cuadros de código para copiarlos al portapapeles.<br><br>• <strong>Asa de Lente:</strong> Active el asa física mediante la casilla inferior si prefiere arrastrar desde el mango.",
                 showHandle: "Mostrar asa de lente",
                 toast: "¡Copiado al portapapeles!",
                 urlModalTitle: "Ingrese URL de la imagen",
@@ -796,7 +814,7 @@
                 zoom: "Zoom",
                 dropHint: "Ou glissez-déposez une image ici",
                 footerCredits: "Créé par KAWN HYPERSYSTEMS",
-                instructions: "<strong>Guide et Instructions :</strong><br><br>• <strong>Menu LOAD :</strong> Cliquez sur le bouton rouge <strong>LOAD</strong> en bas à droite pour charger une image locale, un spectre de couleurs interactif ou importer via une URL.<br><br>• <strong>Navigation et Glissement :</strong> Cliquez et glissez sur la zone d'affichage ou dans la loupe pour vous déplacer. Le relâchement du glissement à l'intérieur de la loupe conserve la position exacte sans saut inattendu.<br><br>• <strong>Commandes de Zoom :</strong> Utilisez la molette de la souris sur la loupe, le curseur de zoom, ou cliquez sur le bouton <strong>100%</strong> pour zoomer jusqu'à 30x.<br><br>• <strong>Inspection des Couleurs :</strong> Cliquez sur n'importe quel pixel pour figer ses codes HEX et RGB dans les cartes de lecture supérieures et les copier au clic.<br><br>• <strong>Poignée de Loupe :</strong> Activez la poignée physique à l'aide de la case à cocher ci-dessous.",
+                instructions: "<strong>Guide et Instructions :</strong><br><br>• <strong>Menu LOAD :</strong> Cliquez sur le bouton rouge <strong>LOAD</strong> en bas à droite pour charger une image locale, un spectre de couleurs interactif ou importer via une URL.<br><br>• <strong>Navigation et Glissement :</strong> Cliquez et glissez sur la zone d'affichage ou dans la loupe transparente pour vous déplacer y compris sur le bord supérieur.<br><br>• <strong>Commandes de Zoom :</strong> Utilisez la molette de la souris sur la loupe, le curseur de zoom, ou cliquez sur le bouton <strong>100%</strong> pour zoomer jusqu'à 30x.<br><br>• <strong>Inspection des Couleurs :</strong> Cliquez sur n'importe quel pixel pour figer ses codes HEX et RGB dans les cartes de lecture supérieures et les copier au clic.<br><br>• <strong>Poignée de Loupe :</strong> Activez la poignée physique à l'aide de la case à cocher ci-dessous.",
                 showHandle: "Afficher la poignée",
                 toast: "Copié dans le presse-papier !",
                 urlModalTitle: "Entrer l'URL de l'image",
@@ -812,7 +830,7 @@
                 zoom: "Zoom",
                 dropHint: "Oder Bild hierher ziehen und ablegen",
                 footerCredits: "Erstellt von KAWN HYPERSYSTEMS",
-                instructions: "<strong>Benutzerhandbuch & Anleitung:</strong><br><br>• <strong>LOAD-Menü:</strong> Klicken Sie unten rechts auf den roten <strong>LOAD</strong>-Button, um eine lokale Bilddatei hochzuladen, ein Farbspektrum zu generieren oder eine Bild-URL einzugeben.<br><br>• <strong>Lupen-Navigation & Ziehen:</strong> Klicken und ziehen Sie im Bildbereich oder in der Lupe, um sich flüssig zu bewegen. Das Loslassen des Ziehens innerhalb der Lupe behält die exakte Position bei.<br><br>• <strong>Zoom-Steuerung:</strong> Nutzen Sie das Mausrad über der Lupe, den Schieberegler oder die <strong>100%</strong>-Schaltfläche für bis zu 30-fache Vergrößerung.<br><br>• <strong>Farbauswahl:</strong> Klicken Sie auf einen beliebigen Pixel, um die HEX- und RGB-Werte anzuzeigen und per Klick in die Zwischenablage zu kopieren.<br><br>• <strong>Linsengriff:</strong> Aktivieren Sie den physischen Griff über das Kontrollkästchen.",
+                instructions: "<strong>Benutzerhandbuch & Anleitung:</strong><br><br>• <strong>LOAD-Menü:</strong> Klicken Sie unten rechts auf den roten <strong>LOAD</strong>-Button, um eine lokale Bilddatei hochzuladen, ein Farbspektrum zu generieren oder eine Bild-URL einzugeben.<br><br>• <strong>Lupen-Navigation & Ziehen:</strong> Klicken und ziehen Sie im Bildbereich oder in der transparenten Lupe, um sich flüssig über alle Kanten (einschließlich der oberen Kante) zu bewegen.<br><br>• <strong>Zoom-Steuerung:</strong> Nutzen Sie das Mausrad über der Lupe, den Schieberegler oder die <strong>100%</strong>-Schaltfläche für bis zu 30-fache Vergrößerung.<br><br>• <strong>Farbauswahl:</strong> Klicken Sie auf einen beliebigen Pixel, um die HEX- und RGB-Werte anzuzeigen und per Klick in die Zwischenablage zu kopieren.<br><br>• <strong>Linsengriff:</strong> Aktivieren Sie den physischen Griff über das Kontrollkästchen.",
                 showHandle: "Linsengriff anzeigen",
                 toast: "In die Zwischenablage kopiert!",
                 urlModalTitle: "Bild-URL eingeben",
@@ -828,7 +846,7 @@
                 zoom: "Zoom",
                 dropHint: "或将图片拖放至此处",
                 footerCredits: "由 KAWN HYPERSYSTEMS 创建",
-                instructions: "<strong>使用指南与说明：</strong><br><br>• <strong>LOAD 菜单：</strong> 点击右下角红色的 <strong>LOAD</strong> 按钮以上传本地图像、生成交互式色彩光谱或通过网址导入图像。<br><br>• <strong>透镜导航与拖动：</strong> 直接在图像视口或透镜内部点击并拖动以平移画布。在透镜内部释放拖动时可保留当前精确位置，不会产生跳动。<br><br>• <strong>缩放控制：</strong> 在透镜上滚动鼠标滚轮、调整滑块输入，或点击 <strong>100%</strong> 按钮进行最高 30 倍放大。<br><br>• <strong>颜色取样：</strong> 点击任意像素位置即可将其 HEX 和 RGB 代码锁定至顶部面板，点击代码块可直接复制到剪贴板。<br><br>• <strong>镜头手柄：</strong> 使用下方的复选框启用物理镜头手柄进行拖动。",
+                instructions: "<strong>使用指南与说明：</strong><br><br>• <strong>LOAD 菜单：</strong> 点击右下角红色的 <strong>LOAD</strong> 按钮以上传本地图像、生成交互式色彩光谱或通过网址导入图像。<br><br>• <strong>透镜导航与拖动：</strong> 直接在图像视口或透明透镜内部点击并拖动以平移画布，完美支持包括顶部边界在内的所有边缘检测。<br><br>• <strong>缩放控制：</strong> 在透镜上滚动鼠标滚轮、调整滑块输入，或点击 <strong>100%</strong> 按钮进行最高 30 倍放大。<br><br>• <strong>颜色取样：</strong> 点击任意像素位置即可将其 HEX 和 RGB 代码锁定至顶部面板，点击代码块可直接复制到剪贴板。<br><br>• <strong>镜头手柄：</strong> 使用下方的复选框启用物理镜头手柄进行拖动。",
                 showHandle: "显示镜头手柄",
                 toast: "已复制到剪贴板！",
                 urlModalTitle: "输入图片网址",
@@ -1057,7 +1075,7 @@
                 circle.style.width = '80px';
                 circle.style.height = '80px';
                 circle.style.borderRadius = '50%';
-                circle.style.background = '#000';
+                circle.style.background = 'rgba(0, 0, 0, 0.4)';
                 circle.style.border = '8px solid #ff0000';
                 circle.style.boxSizing = 'border-box';
                 circle.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7)';
@@ -1257,8 +1275,6 @@
             lensCtx.clearRect(0, 0, lensSize, lensSize);
             
             if (isAnimatingOrLoading) {
-                lensCtx.fillStyle = '#000000';
-                lensCtx.fillRect(0, 0, lensSize, lensSize);
                 return;
             }
 
@@ -1328,7 +1344,7 @@
         lensHandle.addEventListener('wheel', handleZoomWheel, { passive: false });
 
         lensCanvas.addEventListener('click', (e) => {
-            if (hasMovedDuringDrag) return; // Prevent snap/jump on completing a drag action
+            if (hasMovedDuringDrag) return; 
             const rect = lensCanvas.getBoundingClientRect();
             const clickOffsetX = e.clientX - rect.left - (rect.width / 2);
             const clickOffsetY = e.clientY - rect.top - (rect.height / 2);
@@ -1408,6 +1424,7 @@
         }, { passive: false });
 
         window.addEventListener('mouseup', () => { isDraggingLens = false; });
+        window.addEventListener('touched', () => { isDraggingLens = false; });
         window.addEventListener('touchend', () => { isDraggingLens = false; });
         window.addEventListener('resize', () => { if (img.src) { calculateFitZoom(); updateMagnifierPosition(); } });
 
