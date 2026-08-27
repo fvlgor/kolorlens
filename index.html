@@ -1,10 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Precision Color Picker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KOLORLENS</title>
+    <!-- Include EXIF-JS library for robust, comprehensive EXIF metadata extraction -->
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <style>
         :root {
             --primary: #ff0000;
@@ -25,8 +26,7 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+            touch-action: none;
         }
 
         body {
@@ -83,9 +83,9 @@
         }
 
         .initial-title {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 800;
-            letter-spacing: -0.5px;
+            letter-spacing: 2px;
             background: linear-gradient(135deg, #ff8888 0%, #aa0000 50%, #440000 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -94,38 +94,57 @@
         }
 
         .title-lens-icon {
-            width: 80px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             position: relative;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
+        }
+
+        @keyframes initialPulse {
+            0% { box-shadow: 0 0 16px rgba(255, 0, 0, 0.85), inset 0 3px 8px rgba(0, 0, 0, 0.45); }
+            50% { box-shadow: 0 0 35px rgba(255, 0, 0, 1), inset 0 0 20px rgba(255, 0, 0, 0.9); }
+            100% { box-shadow: 0 0 16px rgba(255, 0, 0, 0.85), inset 0 3px 8px rgba(0, 0, 0, 0.45); }
         }
 
         .title-lens-circle {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 8px solid #ff0000;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7);
+            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%);
+            border: none;
             position: absolute;
             top: 0;
             left: 0;
             box-sizing: border-box;
+            box-shadow: 0 0 16px rgba(255, 0, 0, 0.85), inset 0 3px 8px rgba(0, 0, 0, 0.45);
+            animation: initialPulse 1.8s infinite ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-lens-circle::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 4px #000;
         }
 
         .title-lens-handle {
             position: absolute;
-            bottom: 0;
+            bottom: -10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 10px;
-            height: 25px;
-            background: linear-gradient(135deg, #333333 0%, #111111 100%);
-            border: 2px solid #555555;
-            border-radius: 0 0 6px 6px;
+            width: 18px;
+            height: 16px;
+            background: #ff0000;
+            border-radius: 8px 8px 6px 6px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            z-index: 50;
         }
 
         .initial-actions {
@@ -135,43 +154,20 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 240px;
+            max-width: 220px;
         }
-
-        .action-btn-large {
-            background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            transition: opacity 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            outline: 1px solid rgba(0, 0, 0, 0.5);
-            text-decoration: none;
-            box-sizing: border-box;
-            pointer-events: auto;
-        }
-        .action-btn-large:hover { opacity: 0.9; }
 
         .initial-lang-select {
-            background: #1f1f1f;
+            background: rgba(31, 31, 31, 0.75);
+            backdrop-filter: blur(6px);
             color: var(--text);
-            border: 1px solid #444;
-            padding: 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 13px;
             outline: none;
             cursor: pointer;
-            width: 160px;
+            width: 180px;
             text-align: center;
             pointer-events: auto;
         }
@@ -183,13 +179,28 @@
             flex: 1;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             min-height: 0;
             transition: opacity 0.8s ease-in;
+            position: relative;
         }
 
         .app-workspace.visible {
             opacity: 1;
+        }
+
+        .workspace-header-title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #ff8888 0%, #aa0000 50%, #440000 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            padding: 5px;
+            flex-shrink: 0;
+            width: 100%;
+            line-height: 1.1;
         }
 
         .control-panel-group {
@@ -223,11 +234,11 @@
         }
 
         .code-box {
-            padding: 6px 16px;
+            padding: 6px 14px;
             border-radius: 6px;
             font-family: monospace;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             border: 1px solid rgba(255, 255, 255, 0.3);
             transition: filter 0.2s;
@@ -245,115 +256,131 @@
             pointer-events: auto;
         }
 
-        .load-dropdown-container {
+        .load-dropdown-container, .info-dropdown-container, .metadata-dropdown-container {
             position: relative;
             display: inline-block;
         }
 
         .load-menu-btn {
-            background: linear-gradient(135deg, #ff0000 0%, #990000 100%);
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.75) 0%, rgba(153, 0, 0, 0.75) 100%);
+            backdrop-filter: blur(6px);
             color: white;
-            padding: 6px 16px;
-            border-radius: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             font-size: 13px;
             transition: opacity 0.2s;
             text-align: center;
             white-space: nowrap;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             outline: 1px solid rgba(0, 0, 0, 0.5);
             pointer-events: auto;
         }
         .load-menu-btn:hover { opacity: 0.9; }
 
-        .popup-menu {
-            position: absolute;
-            bottom: 45px;
-            right: 0;
-            background: #141414;
-            border: 1px solid #333333;
-            padding: 8px;
-            border-radius: 8px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.95);
-            text-align: left;
-            transform-origin: bottom right;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            box-sizing: border-box;
-            z-index: 100;
-            pointer-events: auto;
-        }
-        .popup-menu.hidden {
-            opacity: 0;
-            transform: scale(0.2);
-            pointer-events: none;
-        }
-
-        .load-menu-popup {
-            width: 180px;
-        }
-
-        .instructions-popup {
-            width: 320px;
-            padding: 12px 16px;
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-        .instructions-popup strong { color: #ffffff; }
-
-        .resolution-badge {
-            background: #1f1f1f;
-            border: 1px solid #444;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-family: monospace;
-            color: #ffffff;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .resolution-badge span { color: var(--primary); font-weight: bold; }
-
-        .popup-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            padding: 8px 10px;
-            font-size: 12px;
-            color: var(--text);
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            text-align: left;
-            transition: background 0.2s;
-            box-sizing: border-box;
-            pointer-events: auto;
-        }
-        .popup-menu-item:hover { background: #222222; }
-
-        .info-toggle-btn {
-            background: #1a1a1a;
+        .info-toggle-btn, .metadata-toggle-btn {
+            background: rgba(26, 26, 26, 0.75);
+            backdrop-filter: blur(6px);
             color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             transition: background 0.2s;
             position: relative;
             z-index: 100;
             pointer-events: auto;
         }
-        .info-toggle-btn:hover { background: #333333; }
+        .info-toggle-btn:hover, .metadata-toggle-btn:hover { background: rgba(51, 51, 51, 0.9); }
+
+        .popup-menu {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0) scale(1);
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            text-align: center;
+            width: max-content;
+            max-width: 360px;
+            box-sizing: border-box;
+            z-index: 100;
+            pointer-events: auto;
+            transform-origin: bottom center;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 100px);
+        }
+
+        .popup-menu.hidden {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px) scale(0.2) scaleX(0.05);
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .load-menu-popup {
+            min-width: 170px;
+        }
+
+        .instructions-popup {
+            padding: 14px 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            text-align: justify;
+            max-width: 320px;
+        }
+        .instructions-popup strong { color: #ffffff; }
+
+        .metadata-popup {
+            padding: 14px 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            text-align: justify;
+            width: 340px;
+        }
+        .metadata-popup strong { color: #ffffff; }
+
+        .metadata-content {
+            word-break: break-all;
+            padding-right: 4px;
+            text-align: justify;
+        }
+
+        .popup-menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 12px;
+            font-size: 13px;
+            color: var(--text);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            text-align: center;
+            white-space: nowrap;
+            transition: background 0.2s;
+            box-sizing: border-box;
+            pointer-events: auto;
+        }
+        .popup-menu-item:hover { background: rgba(255, 255, 255, 0.1); }
 
         input[type="file"] { display: none; }
 
@@ -371,6 +398,7 @@
             justify-content: center;
             align-items: center;
             z-index: 5;
+            touch-action: none;
         }
 
         .canvas-container {
@@ -381,6 +409,7 @@
             width: 100%;
             height: 100%;
             cursor: crosshair;
+            touch-action: none;
         }
 
         canvas {
@@ -389,6 +418,12 @@
             max-height: 100%;
             object-fit: contain;
             z-index: 6;
+        }
+
+        .click-through-text {
+            position: absolute;
+            pointer-events: none;
+            z-index: 7;
         }
 
         #magnifierWrapper {
@@ -416,31 +451,28 @@
             border-radius: 50%;
             width: 180px;
             height: 180px;
-            background-color: transparent;
+            background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%);
             pointer-events: auto;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7);
+            box-shadow: 0 0 16px rgba(255, 0, 0, 0.85), inset 0 3px 8px rgba(0, 0, 0, 0.45);
             cursor: crosshair;
         }
 
         .lens-handle {
             position: absolute;
-            bottom: -27px;
+            bottom: -16px;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
-            height: 45px;
-            background: linear-gradient(135deg, #333333 0%, #111111 100%);
-            border: 2px solid #555555;
-            border-radius: 0 0 10px 10px;
+            width: 32px;
+            height: 28px;
+            background: #ff0000;
+            border-radius: 12px 12px 8px 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.8);
             pointer-events: auto;
             cursor: grab;
             z-index: 50;
             display: block;
         }
-        .lens-handle:active {
-            cursor: grabbing;
-        }
+        .lens-handle:active { cursor: grabbing; }
 
         .zoom-toolbar {
             display: flex;
@@ -448,7 +480,7 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            padding: 6px 0;
+            padding: 4px 0;
             flex-shrink: 0;
             z-index: 60;
             position: relative;
@@ -458,7 +490,7 @@
         .zoom-slider {
             -webkit-appearance: none;
             appearance: none;
-            width: 200px;
+            width: 180px;
             height: 6px;
             background: #222222;
             border-radius: 3px;
@@ -469,63 +501,47 @@
         .zoom-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: var(--primary);
             cursor: pointer;
             box-shadow: 0 0 6px rgba(255,0,0,0.8);
         }
 
-        .zoom-100-btn {
+        .zoom-btn {
             background: #1f1f1f;
             color: var(--text);
             border: 1px solid #444;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
             cursor: pointer;
             font-weight: 600;
             pointer-events: auto;
         }
-        .zoom-100-btn:hover { background: #333; }
+        .zoom-btn:hover { background: #333; }
 
         .lang-select {
             width: 100%;
-            background: #1f1f1f;
+            background: rgba(31, 31, 31, 0.75);
+            backdrop-filter: blur(6px);
             color: var(--text);
-            border: 1px solid #444;
-            padding: 5px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            font-size: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 6px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 12px;
             outline: none;
             cursor: pointer;
             box-sizing: border-box;
             pointer-events: auto;
-        }
-
-        .handle-toggle-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 1px solid #222;
-            cursor: pointer;
-            font-size: 11px;
-            color: var(--text);
-            user-select: none;
-            pointer-events: auto;
-        }
-        .handle-toggle-label input {
-            cursor: pointer;
-            accent-color: var(--primary);
+            text-align: center;
         }
 
         footer {
             margin-top: 6px;
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-muted);
             text-align: center;
             z-index: 4;
@@ -555,7 +571,7 @@
             opacity: 0;
             pointer-events: none;
             z-index: 500;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.8s ease;
         }
 
         #urlModalOverlay {
@@ -593,14 +609,8 @@
             transform: scale(0.9);
             transition: transform 0.3s ease;
         }
-        #urlModalOverlay.active .url-modal {
-            transform: scale(1);
-        }
-        .url-modal h3 {
-            margin: 0;
-            font-size: 16px;
-            color: #fff;
-        }
+        #urlModalOverlay.active .url-modal { transform: scale(1); }
+        .url-modal h3 { margin: 0; font-size: 16px; color: #fff; text-align: justify; }
         .url-modal input[type="text"] {
             background: #0a0a0a;
             border: 1px solid #444;
@@ -612,14 +622,8 @@
             width: 100%;
             box-sizing: border-box;
         }
-        .url-modal input[type="text"]:focus {
-            border-color: var(--primary);
-        }
-        .url-modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
+        .url-modal input[type="text"]:focus { border-color: var(--primary); }
+        .url-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
         .url-modal-btn {
             background: #222;
             color: #fff;
@@ -638,37 +642,42 @@
 
         #flyingLogoContainer {
             position: fixed;
-            z-index: 300;
+            z-index: 600;
             pointer-events: none;
             transform-origin: center;
-            transition: transform 0.84s cubic-bezier(0.25, 1, 0.5, 1), width 0.84s cubic-bezier(0.25, 1, 0.5, 1), height 0.84s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.84s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7); }
+            0% { box-shadow: 0 0 16px rgba(255, 0, 0, 0.85), inset 0 3px 8px rgba(0, 0, 0, 0.45); }
             50% { box-shadow: 0 0 35px rgba(255, 0, 0, 1), inset 0 0 20px rgba(255, 0, 0, 1); }
-            100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7); }
+            100% { box-shadow: 0 0 16px rgba(255, 0, 0, 0.85), inset 0 3px 8px rgba(0, 0, 0, 0.45); }
         }
-        .pulsating {
-            animation: pulseGlow 0.4s ease-in-out 2;
-        }
+        .pulsating { animation: pulseGlow 0.4s ease-in-out 2; }
 
         #toast {
             position: fixed;
-            top: 20px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            background: #ff0000;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 0, 0, 0.95);
+            backdrop-filter: blur(6px);
             color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
             z-index: 1000;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            outline: 1px solid rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        @media (max-width: 768px) {
+            .initial-title { font-size: 26px; }
+            .zoom-btn { font-size: 11px; padding: 5px 8px; }
         }
     </style>
 </head>
@@ -687,57 +696,48 @@
     </div>
 
     <div class="container" id="dropContainer">
-        <div class="initial-screen" id="initialScreen">
+        <div class="initial-screen" id="initialScreen" style="opacity: 0; transition: opacity 0.6s ease;">
             <div class="title-header-wrapper" id="titleHeaderWrapper">
-                <h1 class="initial-title" id="initialTitleText">Precision Color Picker</h1>
-                <div class="title-lens-icon" id="titleLensIcon">
+                <div class="title-lens-icon" id="titleLensIcon" style="opacity: 0; transform: scale(0.5); transition: all 0.6s ease;">
                     <div class="title-lens-circle" id="titleLensCircle"></div>
-                    <div class="title-lens-handle"></div>
+                    <div class="title-lens-handle" id="titleLensHandle"></div>
                 </div>
+                <h1 class="initial-title" id="initialTitleText" style="opacity: 0; transform: translateY(20px); transition: all 0.6s ease 0.3s;">KOLORLENS</h1> 
             </div>
-            <div class="initial-actions">
-                <label class="action-btn-large" id="chooseImageBtnText">
-                    📁 Choose Image
-                    <input type="file" id="imageLoaderInitial" accept="image/*">
-                </label>
-                <button class="action-btn-large" id="chooseClipboardInitial">
-                    📋 Paste Image
-                </button>
-                <button class="action-btn-large" id="chooseSpectrumInitial">
-                    🌈 Color Spectrum
-                </button>
-                <button class="action-btn-large" id="chooseUrlInitial">
-                    🔗 Image URL
-                </button>
-            </div>
-            <select class="initial-lang-select" id="initialLangSelector">
-                <option value="en" selected>English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="zh">中文</option>
-            </select>
-            <div style="font-size: 12px; color: var(--text-muted);" id="dropHintText">Or drag and drop an image here</div>
-        </div>
-        <div class="app-workspace" id="appWorkspace">
-            <div class="control-panel-group" id="controlPanelGroup">
-                <div class="top-toolbar">
-                    <div class="codes-group">
-                        <span class="code-box" id="hexCode" onclick="copyToClipboard(this.innerText)">HEX: --</span>
-                        <span class="code-box" id="rgbCode" onclick="copyToClipboard(this.innerText)">RGB: --</span>
+            <div class="initial-actions" id="initialActionsGroup" style="opacity: 0; transform: translateY(15px); transition: all 0.6s ease 0.5s;">
+                <div class="load-dropdown-container" style="width: 100%;">
+                    <button class="load-menu-btn" id="loadMenuToggleBtnInitial" style="width: 100%;">LOAD ▼</button>
+                    <div class="popup-menu load-menu-popup hidden" id="loadMenuPopupInitial">
+                        <button class="popup-menu-item" id="menuChooseImageInitial">📁 Choose Image</button>
+                        <button class="popup-menu-item" id="menuClipboardInitial">📋 Paste Image</button>
+                        <button class="popup-menu-item" id="menuColorSpectrumInitial">🌈 Color Spectrum</button>
+                        <button class="popup-menu-item" id="menuImageUrlInitial">🔗 Image URL</button>
                     </div>
                 </div>
+                <select class="initial-lang-select" id="initialLangSelector">
+                    <option value="en" selected>English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="zh">中文</option>
+                </select>
             </div>
+            <div style="font-size: 13px; color: var(--text-muted); opacity: 0; transition: opacity 0.6s ease 0.6s; text-align: justify;" id="dropHintText">Or drag and drop an image here</div>
+        </div>
+        <div class="app-workspace" id="appWorkspace">
+            <div class="workspace-header-title" id="workspaceHeaderTitle">KOLORLENS</div>
+
             <div class="canvas-viewport" id="canvasViewport">
                 <div class="canvas-container" id="canvasContainer">
                     <canvas id="imageCanvas"></canvas>
+                    <div class="click-through-text" id="clickThroughTextLayer"></div>
                 </div>
             </div>
             
             <div class="zoom-toolbar" id="zoomToolbar">
-                <span style="font-size: 11px; color: var(--text-muted);" id="zoomLabelText">Zoom</span>
+                <span style="font-size: 12px; color: var(--text-muted);" id="zoomLabelText">Zoom</span>
                 <input type="range" min="1" max="30" step="0.5" value="1" class="zoom-slider" id="zoomSlider">
-                <button class="zoom-100-btn" id="zoom100Btn">100%</button>
+                <button class="zoom-btn" id="zoomToggleBtn">100%</button>
                 <div class="toolbar-action-group" style="position: relative;">
                     <div class="load-dropdown-container">
                         <button class="load-menu-btn" id="loadMenuToggleBtn">LOAD ▼</button>
@@ -749,30 +749,43 @@
                         </div>
                     </div>
                     <input type="file" id="imageLoaderActive" accept="image/*">
-                    <button class="info-toggle-btn" id="infoToggleBtn" title="Toggle Instructions">?</button>
-                    <div class="popup-menu instructions-popup hidden" id="instructionsPopup">
-                        <select class="lang-select" id="langSelector">
-                            <option value="en" selected>English</option>
-                            <option value="es">Español</option>
-                            <option value="fr">Français</option>
-                            <option value="de">Deutsch</option>
-                            <option value="zh">中文</option>
-                        </select>
-                        <div class="resolution-badge" id="resolutionBadge">
-                            <span id="resLabelText">Resolution:</span> <strong id="resolutionValText">-- x -- px</strong>
+                    
+                    <!-- COMPREHENSIVE METADATA & EXIF INFO BUTTON -->
+                    <div class="metadata-dropdown-container">
+                        <button class="metadata-toggle-btn" id="metadataToggleBtn" title="View Comprehensive EXIF & File Metadata">ℹ</button>
+                        <div class="popup-menu metadata-popup hidden" id="metadataPopup">
+                            <div class="metadata-content" id="metadataContent">
+                                <em>No image loaded yet.</em>
+                            </div>
                         </div>
-                        <div id="instructionsText">
-                            <strong>User Guide & Instructions:</strong><br><br>
-                            • <strong>LOAD Menu:</strong> Click the red <strong>LOAD</strong> button at the bottom right to upload a local image file, paste directly from clipboard, generate an interactive chromatic color spectrum, or import an image via URL.<br><br>
-                            • <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the transparent magnifier lens to smoothly pan across canvas edges (including upper boundaries).<br><br>
-                            • <strong>Zoom Controls:</strong> Use your mouse scroll wheel over the lens/zoom slider, adjust the slider input, or click the <strong>100%</strong> button to instantly scale up to 30x magnification.<br><br>
-                            • <strong>Color Sampling:</strong> Click any pixel location to lock its precise HEX and RGB values into the top readout cards. Click either code card to instantly copy it to your clipboard.<br><br>
-                            • <strong>Handle Toggle:</strong> Enable the physical lens handle using the checkbox below to drag by the handle bar instead of the center glass.
+                    </div>
+
+                    <div class="info-dropdown-container">
+                        <button class="info-toggle-btn" id="infoToggleBtn" title="Toggle Instructions">?</button>
+                        <div class="popup-menu instructions-popup hidden" id="instructionsPopup">
+                            <div id="instructionsText">
+                                • <strong>LOAD Menu:</strong> Click the translucent <strong>LOAD</strong> button to upload a local image file, paste directly from clipboard, generate an interactive chromatic color spectrum, or import an image via URL.<br><br>
+                                • <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the transparent magnifier lens to smoothly pan across canvas edges.<br><br>
+                                • <strong>Zoom Controls & Pinch-Zoom:</strong> Use mouse scroll anywhere, slider, Default/100% toggle button, or mobile pinch-zoom directly on the image canvas.<br><br>
+                                • <strong>EXIF & Metadata:</strong> Click the ℹ button to view full camera EXIF specs (Make, Model, ISO, Shutter, Aperture, GPS) and file properties.
+                            </div>
+                            <select class="lang-select" id="langSelector">
+                                <option value="en" selected>English</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
+                                <option value="zh">中文</option>
+                            </select>
                         </div>
-                        <label class="handle-toggle-label">
-                            <input type="checkbox" id="handleToggleCheckbox" checked>
-                            <span id="showHandleLabelText">Show lens handle</span>
-                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel-group" id="controlPanelGroup">
+                <div class="top-toolbar">
+                    <div class="codes-group">
+                        <span class="code-box" id="hexCode" onclick="copyToClipboard(this.innerText)">HEX: --</span>
+                        <span class="code-box" id="rgbCode" onclick="copyToClipboard(this.innerText)">RGB: --</span>
                     </div>
                 </div>
             </div>
@@ -787,7 +800,7 @@
     </div>
 
     <footer>
-        <span id="footerTitleSlot">Precision Color Picker |</span>
+        <span id="footerTitleSlot">KOLORLENS |</span>
         <div class="credits" id="footerCreditsText">Created by KAWN HYPERSYSTEMS</div>
     </footer>
     <div id="toast">Copied to clipboard!</div>
@@ -795,7 +808,8 @@
     <script>
         const translations = {
             en: {
-                title: "Precision Color Picker",
+                title: "KOLORLENS",
+                loadBtn: "LOAD ▼",
                 chooseImage: "📁 Choose Image",
                 clipboard: "📋 Paste Image",
                 colorSpectrum: "🌈 Color Spectrum",
@@ -803,9 +817,7 @@
                 zoom: "Zoom",
                 dropHint: "Or drag and drop an image here",
                 footerCredits: "Created by KAWN HYPERSYSTEMS",
-                resolution: "Resolution:",
-                instructions: "<strong>User Guide & Instructions:</strong><br><br>• <strong>LOAD Menu:</strong> Click the red <strong>LOAD</strong> button at the bottom right to upload a local image file, paste directly from clipboard, generate an interactive chromatic color spectrum, or import an image via URL.<br><br>• <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the transparent magnifier lens to smoothly pan across canvas edges (including upper boundaries).<br><br>• <strong>Zoom Controls:</strong> Use your mouse scroll wheel over the lens/zoom slider, adjust the slider input, or click the <strong>100%</strong> button to instantly scale up to 30x magnification.<br><br>• <strong>Color Sampling:</strong> Click any pixel location to lock its precise HEX and RGB values into the top readout cards. Click either code card to instantly copy it to your clipboard.<br><br>• <strong>Handle Toggle:</strong> Enable the physical lens handle using the checkbox below to drag by the handle bar instead of the center glass.",
-                showHandle: "Show lens handle",
+                instructions: "• <strong>LOAD Menu:</strong> Click the translucent <strong>LOAD</strong> button to upload a local image file, paste directly from clipboard, generate an interactive chromatic color spectrum, or import an image via URL.<br><br>• <strong>Lens Navigation & Dragging:</strong> Click and drag anywhere directly on the image viewport or inside the transparent magnifier lens to smoothly pan across canvas edges.<br><br>• <strong>Zoom Controls & Pinch-Zoom:</strong> Use mouse scroll anywhere, slider, Default/100% toggle button, or mobile pinch-zoom directly on the image canvas.<br><br>• <strong>EXIF & Metadata:</strong> Click the ℹ button to view full camera EXIF specs (Make, Model, ISO, Shutter, Aperture, GPS) and file properties.",
                 toast: "Copied to clipboard!",
                 urlModalTitle: "Enter Image URL",
                 urlModalPlaceholder: "https://example.com/image.jpg",
@@ -815,7 +827,8 @@
                 _f1: "CAMA88"
             },
             es: {
-                title: "Selector de Color Preciso",
+                title: "KOLORLENS",
+                loadBtn: "CARGAR ▼",
                 chooseImage: "📁 Elegir Imagen",
                 clipboard: "📋 Pegar Imagen",
                 colorSpectrum: "🌈 Espectro de Color",
@@ -823,9 +836,7 @@
                 zoom: "Zoom",
                 dropHint: "O arrastra y suelta una imagen aquí",
                 footerCredits: "Creado por KAWN HYPERSYSTEMS",
-                resolution: "Resolución:",
-                instructions: "<strong>Guía de Usuario e Instrucciones:</strong><br><br>• <strong>Menú LOAD:</strong> Haga clic en el botón rojo <strong>LOAD</strong> abajo a la derecha para cargar un archivo local, pegar desde el portapapeles, generar un espectro cromático interactivo o importar mediante URL.<br><br>• <strong>Navegación y Arrastre:</strong> Haga clic y arrastre en la vista previa o dentro de la lente transparente para desplazarse con fluidez por todos los bordes (incluyendo el borde superior).<br><br>• <strong>Controles de Zoom:</strong> Use la rueda del ratón sobre la lente, mueva el control deslizante o haga clic en el botón <strong>100%</strong> para escalar hasta 30x.<br><br>• <strong>Inspección de Color:</strong> Haga clic en cualquier píxel para capturar sus códigos HEX y RGB. Haga clic en los cuadros de código para copiarlos al portapapeles.<br><br>• <strong>Asa de Lente:</strong> Active el asa física mediante la casilla inferior si prefiere arrastrar desde el mango.",
-                showHandle: "Mostrar asa de lente",
+                instructions: "• <strong>Menú LOAD:</strong> Haga clic en el botón translúcido <strong>CARGAR</strong> para cargar un archivo local, pegar desde el portapapeles, generar un espectro cromático interactivo o importar mediante URL.<br><br>• <strong>Navegación y Arrastre:</strong> Haga clic y arrastre en la vista previa o dentro de la lente transparente para desplazarse.<br><br>• <strong>Controles de Zoom:</strong> Use la rueda del ratón en cualquier parte, el deslizador, el botón de alternancia o zoom táctil móvil.<br><br>• <strong>EXIF y Metadatos:</strong> Haga clic en el botón ℹ para ver especificaciones EXIF completas de la cámara y propiedades del archivo.",
                 toast: "¡Copiado al portapapeles!",
                 urlModalTitle: "Ingrese URL de la imagen",
                 urlModalPlaceholder: "https://ejemplo.com/imagen.jpg",
@@ -834,7 +845,8 @@
                 clipboardError: "¡No se encontró ninguna imagen en el portapapeles!"
             },
             fr: {
-                title: "Sélecteur de Couleur de Précision",
+                title: "KOLORLENS",
+                loadBtn: "CHARGER ▼",
                 chooseImage: "📁 Choisir une image",
                 clipboard: "📋 Coller l'image",
                 colorSpectrum: "🌈 Spectre de Couleurs",
@@ -842,9 +854,7 @@
                 zoom: "Zoom",
                 dropHint: "Ou glissez-déposez une image ici",
                 footerCredits: "Créé par KAWN HYPERSYSTEMS",
-                resolution: "Résolution :",
-                instructions: "<strong>Guide et Instructions :</strong><br><br>• <strong>Menu LOAD :</strong> Cliquez sur le bouton rouge <strong>LOAD</strong> en bas à droite pour charger une image locale, coller depuis le presse-papier, un spectre de couleurs interactif ou importer via une URL.<br><br>• <strong>Navigation et Glissement :</strong> Cliquez et glissez sur la zone d'affichage ou dans la loupe transparente pour vous déplacer y compris sur le bord supérieur.<br><br>• <strong>Commandes de Zoom :</strong> Utilisez la molette de la souris sur la loupe, le curseur de zoom, ou cliquez sur le bouton <strong>100%</strong> pour zoomer jusqu'à 30x.<br><br>• <strong>Inspection des Couleurs :</strong> Cliquez sur n'importe quel pixel pour figer ses codes HEX et RGB dans les cartes de lecture supérieures et les copier au clic.<br><br>• <strong>Poignée de Loupe :</strong> Activez la poignée physique à l'aide de la case à cocher ci-dessous.",
-                showHandle: "Afficher la poignée",
+                instructions: "• <strong>Menu LOAD :</strong> Cliquez sur le bouton transparent <strong>CHARGER</strong> pour charger un fichier local, coller depuis le presse-papier, générer un spectre de couleurs ou importer via une URL.<br><br>• <strong>Navigation :</strong> Glissez-déposez n'importe où sur la vue ou la loupe pour vous déplacer.<br><br>• <strong>Contrôles de Zoom :</strong> Utilisez la molette, le curseur, le bouton 100% ou le zoom tactile mobile.<br><br>• <strong>EXIF & Métadonnées :</strong> Cliquez sur le bouton ℹ pour afficher toutes les caractéristiques EXIF et propriétés du fichier.",
                 toast: "Copié dans le presse-papier !",
                 urlModalTitle: "Entrer l'URL de l'image",
                 urlModalPlaceholder: "https://exemple.com/image.jpg",
@@ -853,7 +863,8 @@
                 clipboardError: "Aucune image trouvée dans le presse-papier !"
             },
             de: {
-                title: "Präziser Farbwähler",
+                title: "KOLORLENS",
+                loadBtn: "LADEN ▼",
                 chooseImage: "📁 Bild auswählen",
                 clipboard: "📋 Bild einfügen",
                 colorSpectrum: "🌈 Farbspektrum",
@@ -861,9 +872,7 @@
                 zoom: "Zoom",
                 dropHint: "Oder Bild hierher ziehen und ablegen",
                 footerCredits: "Erstellt von KAWN HYPERSYSTEMS",
-                resolution: "Auflösung:",
-                instructions: "<strong>Benutzerhandbuch & Anleitung:</strong><br><br>• <strong>LOAD-Menü:</strong> Klicken Sie unten rechts auf den roten <strong>LOAD</strong>-Button, um ein lokales Bild hochzuladen, aus der Zwischenablage einzufügen, ein Farbspektrum zu generieren oder eine Bild-URL einzugeben.<br><br>• <strong>Lupen-Navigation & Ziehen:</strong> Klicken und ziehen Sie im Bildbereich oder in der transparenten Lupe, um sich flüssig über alle Kanten (einschließlich der oberen Kante) zu bewegen.<br><br>• <strong>Zoom-Steuerung:</strong> Nutzen Sie das Mausrad über der Lupe, den Schieberegler oder die <strong>100%</strong>-Schaltfläche für bis zu 30-fache Vergrößerung.<br><br>• <strong>Farbauswahl:</strong> Klicken Sie auf einen beliebigen Pixel, um die HEX- und RGB-Werte anzuzeigen und per Klick in die Zwischenablage zu kopieren.<br><br>• <strong>Linsengriff:</strong> Aktivieren Sie den physischen Griff über das Kontrollkästchen.",
-                showHandle: "Linsengriff anzeigen",
+                instructions: "• <strong>LOAD-Menü:</strong> Klicken Sie auf die transparente <strong>LADEN</strong>-Schaltfläche, um eine lokale Datei hochzuladen, aus der Zwischenablage einzufügen, ein Farbspektrum zu generieren oder eine URL zu importieren.<br><br>• <strong>Navigation:</strong> Ziehen Sie das Bild oder die Lupe, um nahtlos zu schwenken.<br><br>• <strong>Zoom-Steuerung:</strong> Nutzen Sie das Mausrad, den Schieberegler oder Touch-Pinch-Zoom.<br><br>• <strong>EXIF & Metadaten:</strong> Klicken Sie auf die ℹ-Schaltfläche für vollständige Kamera-EXIF-Daten und Dateieigenschaften.",
                 toast: "In die Zwischenablage kopiert!",
                 urlModalTitle: "Bild-URL eingeben",
                 urlModalPlaceholder: "https://beispiel.de/bild.jpg",
@@ -872,7 +881,8 @@
                 clipboardError: "Kein Bild in der Zwischenablage gefunden!"
             },
             zh: {
-                title: "精密取色器",
+                title: "KOLORLENS",
+                loadBtn: "加载 ▼",
                 chooseImage: "📁 选择图片",
                 clipboard: "📋 粘贴图片",
                 colorSpectrum: "🌈 色彩光谱",
@@ -880,9 +890,7 @@
                 zoom: "Zoom",
                 dropHint: "或将图片拖放至此处",
                 footerCredits: "由 KAWN HYPERSYSTEMS 创建",
-                resolution: "分辨率：",
-                instructions: "<strong>使用指南与说明：</strong><br><br>• <strong>LOAD 菜单：</strong> 点击右下角红色的 <strong>LOAD</strong> 按钮以上传本地图像、从剪贴板粘贴、生成交互式色彩光谱或通过网址导入图像。<br><br>• <strong>透镜导航与拖动：</strong> 直接在图像视口或透明透镜内部点击并拖动以平移画布，完美支持包括顶部边界在内的所有边缘检测。<br><br>• <strong>缩放控制：</strong> 在透镜上滚动鼠标滚轮、调整滑块输入，或点击 <strong>100%</strong> 按钮进行最高 30 倍放大。<br><br>• <strong>颜色取样：</strong> 点击任意像素位置即可将其 HEX 和 RGB 代码锁定至顶部面板，点击代码块可直接复制到剪贴板。<br><br>• <strong>镜头手柄：</strong> 使用下方的复选框启用物理镜头手柄进行拖动。",
-                showHandle: "显示镜头手柄",
+                instructions: "• <strong>LOAD 菜单：</strong> 点击半透明的 <strong>加载</strong> 按钮上传本地图像文件、从剪贴板粘贴、生成交互式色彩光谱或通过网址导入图像。<br><br>• <strong>透镜导航与拖动：</strong> 在图像视口或透明放大镜内部任意点击并拖动以平移画布。<br><br>• <strong>缩放控制：</strong> 支持任意位置鼠标滚动、滑块、100% 切换按钮或移动端双指缩放。<br><br>• <strong>EXIF 与元数据：</strong> 点击 ℹ 按钮以查看完整的相机 EXIF 参数（相机品牌、型号、ISO、快门速度、光圈、GPS）及全部文件属性。",
                 toast: "已复制到剪贴板！",
                 urlModalTitle: "输入图片网址",
                 urlModalPlaceholder: "https://example.com/image.jpg",
@@ -894,11 +902,7 @@
 
         const initialScreen = document.getElementById('initialScreen');
         const appWorkspace = document.getElementById('appWorkspace');
-        const imageLoaderInitial = document.getElementById('imageLoaderInitial');
         const imageLoaderActive = document.getElementById('imageLoaderActive');
-        const chooseClipboardInitial = document.getElementById('chooseClipboardInitial');
-        const chooseSpectrumInitial = document.getElementById('chooseSpectrumInitial');
-        const chooseUrlInitial = document.getElementById('chooseUrlInitial');
         const canvas = document.getElementById('imageCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const lensCanvas = document.getElementById('lensCanvas');
@@ -907,29 +911,32 @@
         const canvasViewport = document.getElementById('canvasViewport');
         const magnifierWrapper = document.getElementById('magnifierWrapper');
         const lensHandle = document.getElementById('lensHandle');
+        const titleLensHandle = document.getElementById('titleLensHandle');
         const hexCode = document.getElementById('hexCode');
         const rgbCode = document.getElementById('rgbCode');
         const zoomSlider = document.getElementById('zoomSlider');
-        const zoom100Btn = document.getElementById('zoom100Btn');
+        const zoomToggleBtn = document.getElementById('zoomToggleBtn');
         const infoToggleBtn = document.getElementById('infoToggleBtn');
         const instructionsPopup = document.getElementById('instructionsPopup');
         const instructionsText = document.getElementById('instructionsText');
+        
+        const metadataToggleBtn = document.getElementById('metadataToggleBtn');
+        const metadataPopup = document.getElementById('metadataPopup');
+        const metadataContent = document.getElementById('metadataContent');
+
         const initialTitleText = document.getElementById('initialTitleText');
+        const workspaceHeaderTitle = document.getElementById('workspaceHeaderTitle');
         const titleLensIcon = document.getElementById('titleLensIcon');
-        const chooseImageBtnText = document.getElementById('chooseImageBtnText');
+        const initialActionsGroup = document.getElementById('initialActionsGroup');
+        const initialLangSelector = document.getElementById('initialLangSelector');
         const zoomLabelText = document.getElementById('zoomLabelText');
         const dropHintText = document.getElementById('dropHintText');
         const footerCreditsText = document.getElementById('footerCreditsText');
         const footerTitleSlot = document.getElementById('footerTitleSlot');
         const langSelector = document.getElementById('langSelector');
-        const initialLangSelector = document.getElementById('initialLangSelector');
         const toast = document.getElementById('toast');
         const dropContainer = document.getElementById('dropContainer');
         const splashOverlay = document.getElementById('splashOverlay');
-        const handleToggleCheckbox = document.getElementById('handleToggleCheckbox');
-        const showHandleLabelText = document.getElementById('showHandleLabelText');
-        const resLabelText = document.getElementById('resLabelText');
-        const resolutionValText = document.getElementById('resolutionValText');
 
         const urlModalOverlay = document.getElementById('urlModalOverlay');
         const modalTitleText = document.getElementById('modalTitleText');
@@ -943,6 +950,13 @@
         const menuClipboard = document.getElementById('menuClipboard');
         const menuColorSpectrum = document.getElementById('menuColorSpectrum');
         const menuImageUrl = document.getElementById('menuImageUrl');
+
+        const loadMenuToggleBtnInitial = document.getElementById('loadMenuToggleBtnInitial');
+        const loadMenuPopupInitial = document.getElementById('loadMenuPopupInitial');
+        const menuChooseImageInitial = document.getElementById('menuChooseImageInitial');
+        const menuClipboardInitial = document.getElementById('menuClipboardInitial');
+        const menuColorSpectrumInitial = document.getElementById('menuColorSpectrumInitial');
+        const menuImageUrlInitial = document.getElementById('menuImageUrlInitial');
 
         let img = new Image();
         let currentCanvasX = 0, currentCanvasY = 0;
@@ -958,16 +972,26 @@
         let isFirstLoad = true;
         let pendingRAF = null;
         let isAnimatingOrLoading = false;
+        let isZoomAtDefault = true;
+
+        let initialPinchDistance = null;
+        let initialPinchZoom = 1;
+
+        let currentImageMetadata = {
+            name: "Generated / Remote Source",
+            size: 0,
+            type: "Unknown",
+            lastModified: "Unknown",
+            pathOrUrl: "",
+            exif: null
+        };
 
         const SYSTEM_CONFIG = { _f2: "0831" };
         const RUNTIME_SALT = "HDFNH0";
 
         function verifyIntegrity() {
             try {
-                let f1 = translations.en._f1;
-                let f2 = SYSTEM_CONFIG._f2;
-                let f3 = RUNTIME_SALT;
-                if ((f1 + f2 + f3) !== "CAMA880831HDFNH0") {
+                if ((translations.en._f1 + SYSTEM_CONFIG._f2 + RUNTIME_SALT) !== "CAMA880831HDFNH0") {
                     throw new Error("Integrity violation");
                 }
             } catch (err) {
@@ -977,63 +1001,178 @@
         }
         verifyIntegrity();
 
+        window.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initialScreen.style.opacity = '1';
+            setTimeout(() => {
+                titleLensIcon.style.opacity = '1';
+                titleLensIcon.style.transform = 'scale(1)';
+            }, 100);
+            setTimeout(() => {
+                initialTitleText.style.opacity = '1';
+                initialTitleText.style.transform = 'translateY(0)';
+            }, 400);
+            setTimeout(() => {
+                initialActionsGroup.style.opacity = '1';
+                initialActionsGroup.style.transform = 'translateY(0)';
+                dropHintText.style.opacity = '1';
+            }, 700);
+        });
+
         function setLanguage(lang) {
             currentLang = lang;
-            langSelector.value = lang;
-            initialLangSelector.value = lang;
+            if (langSelector) langSelector.value = lang;
+            if (initialLangSelector) initialLangSelector.value = lang;
             const t = translations[currentLang];
             initialTitleText.innerText = t.title;
-            chooseImageBtnText.childNodes[1].nodeValue = " " + t.chooseImage;
-            chooseClipboardInitial.innerText = t.clipboard;
-            chooseSpectrumInitial.innerText = t.colorSpectrum;
-            chooseUrlInitial.innerText = t.imageUrl;
+            workspaceHeaderTitle.innerText = t.title;
             zoomLabelText.innerText = t.zoom;
             dropHintText.innerText = t.dropHint;
             footerCreditsText.innerText = t.footerCredits;
-            resLabelText.innerText = t.resolution;
             instructionsText.innerHTML = t.instructions;
-            showHandleLabelText.innerText = t.showHandle;
             toast.innerText = t.toast;
             footerTitleSlot.innerText = t.title + " |";
-            menuChooseImage.innerText = t.chooseImage;
-            menuClipboard.innerText = t.clipboard;
-            menuColorSpectrum.innerText = t.colorSpectrum;
-            menuImageUrl.innerText = t.imageUrl;
+            
+            loadMenuToggleBtn.innerText = t.loadBtn;
+            loadMenuToggleBtnInitial.innerText = t.loadBtn;
+
+            const loadTexts = [t.chooseImage, t.clipboard, t.colorSpectrum, t.imageUrl];
+            [menuChooseImage, menuChooseImageInitial].forEach(el => el.innerText = loadTexts[0]);
+            [menuClipboard, menuClipboardInitial].forEach(el => el.innerText = loadTexts[1]);
+            [menuColorSpectrum, menuColorSpectrumInitial].forEach(el => el.innerText = loadTexts[2]);
+            [menuImageUrl, menuImageUrlInitial].forEach(el => el.innerText = loadTexts[3]);
+
             modalTitleText.innerText = t.urlModalTitle;
             urlModalInput.placeholder = t.urlModalPlaceholder;
             urlModalCancel.innerText = t.urlModalCancel;
             urlModalSubmit.innerText = t.urlModalSubmit;
         }
 
-        langSelector.addEventListener('change', (e) => setLanguage(e.target.value));
-        initialLangSelector.addEventListener('change', (e) => setLanguage(e.target.value));
-
-        handleToggleCheckbox.addEventListener('change', (e) => {
-            lensHandle.style.display = e.target.checked ? 'block' : 'none';
-        });
+        if (langSelector) langSelector.addEventListener('change', (e) => setLanguage(e.target.value));
+        if (initialLangSelector) initialLangSelector.addEventListener('change', (e) => setLanguage(e.target.value));
 
         infoToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             loadMenuPopup.classList.add('hidden');
+            loadMenuPopupInitial.classList.add('hidden');
+            metadataPopup.classList.add('hidden');
             instructionsPopup.classList.toggle('hidden');
+        });
+
+        metadataToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loadMenuPopup.classList.add('hidden');
+            loadMenuPopupInitial.classList.add('hidden');
+            instructionsPopup.classList.add('hidden');
+            updateMetadataDisplay();
+            metadataPopup.classList.toggle('hidden');
         });
 
         loadMenuToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             instructionsPopup.classList.add('hidden');
+            metadataPopup.classList.add('hidden');
             loadMenuPopup.classList.toggle('hidden');
+        });
+
+        loadMenuToggleBtnInitial.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loadMenuPopupInitial.classList.toggle('hidden');
         });
 
         window.addEventListener('click', (e) => {
             if (!instructionsPopup.contains(e.target) && e.target !== infoToggleBtn) {
                 instructionsPopup.classList.add('hidden');
             }
+            if (!metadataPopup.contains(e.target) && e.target !== metadataToggleBtn) {
+                metadataPopup.classList.add('hidden');
+            }
             if (!loadMenuToggleBtn.contains(e.target) && !loadMenuPopup.contains(e.target)) {
                 loadMenuPopup.classList.add('hidden');
             }
+            if (!loadMenuToggleBtnInitial.contains(e.target) && !loadMenuPopupInitial.contains(e.target)) {
+                loadMenuPopupInitial.classList.add('hidden');
+            }
         });
-        instructionsPopup.addEventListener('click', (e) => e.stopPropagation());
-        loadMenuPopup.addEventListener('click', (e) => e.stopPropagation());
+
+        // Prevent wheel events inside popup menus from triggering image zoom
+        [instructionsPopup, metadataPopup, loadMenuPopup, loadMenuPopupInitial].forEach(popup => {
+            popup.addEventListener('click', (e) => e.stopPropagation());
+            popup.addEventListener('wheel', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+        });
+
+        function formatExposureTime(exp) {
+            if (!exp) return "None";
+            if (exp >= 1) return exp + " s";
+            return "1/" + Math.round(1 / exp) + " s";
+        }
+
+        function formatGPS(coord, ref) {
+            if (!coord) return "None";
+            return `${coord[0]}° ${coord[1]}' ${coord[2]}" ${ref || ''}`;
+        }
+
+        function updateMetadataDisplay() {
+            if (!img.src) {
+                metadataContent.innerHTML = "<em>No image loaded yet.</em>";
+                return;
+            }
+            const sizeBytes = currentImageMetadata.size;
+            const sizeFormatted = sizeBytes && sizeBytes !== "Unknown" ? `${sizeBytes} bytes (${(sizeBytes / (1024*1024)).toFixed(2)} MB)` : "Unknown / Streamed";
+            const modDate = currentImageMetadata.lastModified && currentImageMetadata.lastModified !== "Unknown" ? new Date(currentImageMetadata.lastModified).toUTCString() : "Unknown";
+            const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+            const divisor = gcd(img.width, img.height);
+            const aspectStr = `${img.width / divisor}:${img.height / divisor}`;
+            const totalPixels = (img.width * img.height / 1000000).toFixed(2);
+
+            let exifHTML = "";
+            const exif = currentImageMetadata.exif;
+            if (exif && Object.keys(exif).length > 0) {
+                const make = exif.Make || "Unknown";
+                const model = exif.Model || "Unknown";
+                const iso = exif.ISOSpeedRatings || exif.ISO || "Unknown";
+                const exposure = formatExposureTime(exif.ExposureTime);
+                const fNumber = exif.FNumber ? `f/${exif.FNumber}` : "Unknown";
+                const focalLength = exif.FocalLength ? `${exif.FocalLength} mm` : "Unknown";
+                const dateTimeOriginal = exif.DateTimeOriginal || exif.DateTime || "Unknown";
+                const software = exif.Software || "Unknown";
+                const flash = exif.Flash !== undefined ? (exif.Flash & 1 ? "Fired" : "Did not fire") : "Unknown";
+                const gpsLat = formatGPS(exif.GPSLatitude, exif.GPSLatitudeRef);
+                const gpsLon = formatGPS(exif.GPSLongitude, exif.GPSLongitudeRef);
+
+                exifHTML = `
+                    <br><br><strong>--- Camera EXIF Data ---</strong><br>
+                    • <strong>Camera Make:</strong> ${make}<br>
+                    • <strong>Camera Model:</strong> ${model}<br>
+                    • <strong>ISO Speed:</strong> ${iso}<br>
+                    • <strong>Exposure Time:</strong> ${exposure}<br>
+                    • <strong>F-Number / Aperture:</strong> ${fNumber}<br>
+                    • <strong>Focal Length:</strong> ${focalLength}<br>
+                    • <strong>Capture Date/Time:</strong> ${dateTimeOriginal}<br>
+                    • <strong>Software / Editing:</strong> ${software}<br>
+                    • <strong>Flash Mode:</strong> ${flash}<br>
+                    • <strong>GPS Latitude:</strong> ${gpsLat}<br>
+                    • <strong>GPS Longitude:</strong> ${gpsLon}<br>
+                `;
+            } else {
+                exifHTML = `<br><br><strong>--- Camera EXIF Data ---</strong><br>• <em>No EXIF tags detected in this file.</em><br>`;
+            }
+
+            metadataContent.innerHTML = `
+                • <strong>File Name:</strong> ${currentImageMetadata.name}<br>
+                • <strong>Pixel Dimensions:</strong> ${img.width} × ${img.height} px<br>
+                • <strong>Total Resolution:</strong> ${totalPixels} MP<br>
+                • <strong>Aspect Ratio:</strong> ${aspectStr} (${img.width > img.height ? 'Landscape' : img.width < img.height ? 'Portrait' : 'Square'})<br>
+                • <strong>File Size:</strong> ${sizeFormatted}<br>
+                • <strong>MIME / Format:</strong> ${currentImageMetadata.type}<br>
+                • <strong>Last Modified:</strong> ${modDate}<br>
+                • <strong>Source Path / URL:</strong> ${currentImageMetadata.pathOrUrl || "Local Blob / Clipboard"}
+                ${exifHTML}
+            `;
+        }
 
         function openUrlModal(callback) {
             urlModalInput.value = "";
@@ -1046,9 +1185,7 @@
                 if (val && callback) callback(val);
             };
 
-            const onCancel = () => {
-                cleanup();
-            };
+            const onCancel = () => { cleanup(); };
 
             const onKeyDown = (e) => {
                 if (e.key === 'Enter') onSubmit();
@@ -1093,33 +1230,29 @@
             }
         }
 
-        menuChooseImage.addEventListener('click', () => {
+        [menuChooseImage, menuChooseImageInitial].forEach(btn => btn.addEventListener('click', () => {
             loadMenuPopup.classList.add('hidden');
+            loadMenuPopupInitial.classList.add('hidden');
             imageLoaderActive.click();
-        });
+        }));
 
-        menuClipboard.addEventListener('click', () => {
+        [menuClipboard, menuClipboardInitial].forEach(btn => btn.addEventListener('click', () => {
             loadMenuPopup.classList.add('hidden');
+            loadMenuPopupInitial.classList.add('hidden');
             loadImageFromClipboard();
-        });
+        }));
 
-        chooseClipboardInitial.addEventListener('click', () => {
-            loadImageFromClipboard();
-        });
-
-        menuColorSpectrum.addEventListener('click', () => {
+        [menuColorSpectrum, menuColorSpectrumInitial].forEach(btn => btn.addEventListener('click', () => {
             loadMenuPopup.classList.add('hidden');
+            loadMenuPopupInitial.classList.add('hidden');
             loadColorSpectrum();
-        });
+        }));
 
-        menuImageUrl.addEventListener('click', () => {
+        [menuImageUrl, menuImageUrlInitial].forEach(btn => btn.addEventListener('click', () => {
             loadMenuPopup.classList.add('hidden');
+            loadMenuPopupInitial.classList.add('hidden');
             openUrlModal((url) => loadImageUrl(url));
-        });
-
-        chooseUrlInitial.addEventListener('click', () => {
-            openUrlModal((url) => loadImageUrl(url));
-        });
+        }));
 
         function calculateFitZoom() {
             const viewportRect = canvasViewport.getBoundingClientRect();
@@ -1143,32 +1276,40 @@
                 
                 const flyer = document.createElement('div');
                 flyer.id = 'flyingLogoContainer';
-                flyer.style.width = '80px';
-                flyer.style.height = '100px';
+                flyer.style.width = '90px';
+                flyer.style.height = '90px';
                 flyer.style.left = startRect.left + 'px';
                 flyer.style.top = startRect.top + 'px';
 
                 const circle = document.createElement('div');
-                circle.id = 'flyerCircle';
-                circle.style.width = '80px';
-                circle.style.height = '80px';
+                circle.style.width = '90px';
+                circle.style.height = '90px';
                 circle.style.borderRadius = '50%';
-                circle.style.background = 'rgba(0, 0, 0, 0.4)';
-                circle.style.border = '8px solid #ff0000';
+                circle.style.background = 'radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%)';
                 circle.style.boxSizing = 'border-box';
-                circle.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.7)';
+                circle.style.boxShadow = '0 0 16px rgba(255, 0, 0, 0.85), inset 0 3px 8px rgba(0, 0, 0, 0.45)';
+                circle.style.display = 'flex';
+                circle.style.justifyContent = 'center';
+                circle.style.alignItems = 'center';
+                
+                const dot = document.createElement('div');
+                dot.style.width = '4px';
+                dot.style.height = '4px';
+                dot.style.background = '#ffffff';
+                dot.style.borderRadius = '50%';
+                circle.appendChild(dot);
                 flyer.appendChild(circle);
 
                 const handle = document.createElement('div');
                 handle.style.position = 'absolute';
-                handle.style.bottom = '0';
+                handle.style.bottom = '-10px';
                 handle.style.left = '50%';
                 handle.style.transform = 'translateX(-50%)';
-                handle.style.width = '10px';
-                handle.style.height = '25px';
-                handle.style.background = 'linear-gradient(135deg, #333333 0%, #111111 100%)';
-                handle.style.border = '2px solid #555555';
-                handle.style.borderRadius = '0 0 6px 6px';
+                handle.style.width = '18px';
+                handle.style.height = '16px';
+                handle.style.background = '#ff0000';
+                handle.style.borderRadius = '8px 8px 6px 6px';
+                handle.style.boxShadow = '0 4px 10px rgba(0,0,0,0.8)';
                 flyer.appendChild(handle);
 
                 document.body.appendChild(flyer);
@@ -1176,22 +1317,14 @@
                 appWorkspace.style.display = 'flex';
                 if (onComplete) onComplete();
 
-                const tempX = canvas.width / 2;
-                const tempY = canvas.height / 2;
-                const rect = canvas.getBoundingClientRect();
-                const finalTargetLeft = rect.left + (tempX * (rect.width / canvas.width));
-                const finalTargetTop = rect.top + (tempY * (rect.height / canvas.height));
-
-                const targetX = finalTargetLeft - 40; 
-                const targetY = finalTargetTop - 40; 
+                const viewportRect = canvasViewport.getBoundingClientRect();
+                const targetX = viewportRect.left + (viewportRect.width / 2) - 45; 
+                const targetY = viewportRect.top + (viewportRect.height / 2) - 45; 
 
                 flyer.getBoundingClientRect();
-                flyer.style.transform = `translate(${targetX - startRect.left}px, ${targetY - startRect.top}px) scale(2.25)`;
+                flyer.style.transform = `translate(${targetX - startRect.left}px, ${targetY - startRect.top}px) scale(2)`;
 
-                setTimeout(() => {
-                    circle.classList.add('pulsating');
-                }, 840);
-
+                setTimeout(() => { circle.classList.add('pulsating'); }, 840);
                 setTimeout(() => { splashOverlay.style.opacity = '1'; }, 1890);
 
                 setTimeout(() => {
@@ -1200,7 +1333,7 @@
                     appWorkspace.classList.add('visible');
                     isAnimatingOrLoading = false;
                     updateMagnifierPosition();
-                }, 2310);
+                }, 2710);
             } else {
                 splashOverlay.style.opacity = '1';
                 setTimeout(() => {
@@ -1208,46 +1341,79 @@
                     splashOverlay.style.opacity = '0';
                     isAnimatingOrLoading = false;
                     updateMagnifierPosition();
-                }, 300);
+                }, 800);
             }
         }
 
         function loadImageFile(file) {
             if (!file || !file.type.startsWith('image/')) return;
             isAnimatingOrLoading = true;
+
+            currentImageMetadata = {
+                name: file.name || "Clipboard Image",
+                size: file.size || 0,
+                type: file.type || "image/*",
+                lastModified: file.lastModified || Date.now(),
+                pathOrUrl: file.webkitRelativePath || file.name || "Local File Upload",
+                exif: null
+            };
+
+            EXIF.getData(file, function() {
+                currentImageMetadata.exif = EXIF.getAllTags(this);
+            });
+
             const reader = new FileReader();
             reader.onload = function(event) {
+                const arrayBuf = event.target.result;
+                const blob = new Blob([arrayBuf], { type: file.type || 'image/png' });
+                const blobUrl = URL.createObjectURL(blob);
+
                 img.onload = function() {
                     triggerLoadTransition(() => {
                         canvas.width = img.width;
                         canvas.height = img.height;
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(img, 0, 0);
-                        resolutionValText.innerText = `${img.width} × ${img.height} px`;
                         calculateFitZoom();
                         currentZoom = defaultFitZoom;
+                        isZoomAtDefault = true;
+                        zoomToggleBtn.innerText = "100%";
                         currentCanvasX = img.width / 2;
                         currentCanvasY = img.height / 2;
                         updateMagnifierPosition();
                     });
                 };
-                img.src = event.target.result;
+                img.src = blobUrl;
             };
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         }
 
         function loadImageUrl(url) {
             isAnimatingOrLoading = true;
+            currentImageMetadata = {
+                name: url.split('/').pop().split('?')[0] || "Remote URL Image",
+                size: "Unknown",
+                type: "image/*",
+                lastModified: "Unknown",
+                pathOrUrl: url,
+                exif: null
+            };
+
             img.crossOrigin = "Anonymous";
             img.onload = function() {
+                EXIF.getData(img, function() {
+                    currentImageMetadata.exif = EXIF.getAllTags(this);
+                });
+
                 triggerLoadTransition(() => {
                     canvas.width = img.width;
                     canvas.height = img.height;
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0);
-                    resolutionValText.innerText = `${img.width} × ${img.height} px`;
                     calculateFitZoom();
                     currentZoom = defaultFitZoom;
+                    isZoomAtDefault = true;
+                    zoomToggleBtn.innerText = "100%";
                     currentCanvasX = img.width / 2;
                     currentCanvasY = img.height / 2;
                     updateMagnifierPosition();
@@ -1262,6 +1428,15 @@
 
         function loadColorSpectrum() {
             isAnimatingOrLoading = true;
+            currentImageMetadata = {
+                name: "Interactive Color Spectrum",
+                size: 1200 * 800 * 4,
+                type: "image/png",
+                lastModified: Date.now(),
+                pathOrUrl: "Internal Dynamic Generator",
+                exif: null
+            };
+
             const specCanvas = document.createElement('canvas');
             specCanvas.width = 1200;
             specCanvas.height = 800;
@@ -1292,9 +1467,10 @@
                     canvas.height = img.height;
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0);
-                    resolutionValText.innerText = `${img.width} × ${img.height} px`;
                     calculateFitZoom();
                     currentZoom = defaultFitZoom;
+                    isZoomAtDefault = true;
+                    zoomToggleBtn.innerText = "100%";
                     currentCanvasX = img.width / 2;
                     currentCanvasY = img.height / 2;
                     updateMagnifierPosition();
@@ -1303,9 +1479,7 @@
             img.src = specCanvas.toDataURL('image/png');
         }
 
-        imageLoaderInitial.addEventListener('change', (e) => { if (e.target.files[0]) loadImageFile(e.target.files[0]); });
         imageLoaderActive.addEventListener('change', (e) => { if (e.target.files[0]) loadImageFile(e.target.files[0]); });
-        chooseSpectrumInitial.addEventListener('click', loadColorSpectrum);
 
         ['dragenter', 'dragover'].forEach(eventName => {
             dropContainer.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); dropContainer.classList.add('drag-over'); }, false);
@@ -1368,15 +1542,30 @@
             const centerX = lensSize / 2;
             const centerY = lensSize / 2;
             const ringThickness = lensSize * 0.1171875;
+            
             lensCtx.beginPath();
             lensCtx.arc(centerX, centerY, (lensSize / 2) - (ringThickness / 2), 0, 2 * Math.PI);
             lensCtx.strokeStyle = hex;
             lensCtx.lineWidth = ringThickness;
             lensCtx.stroke();
 
+            lensCtx.save();
+            lensCtx.beginPath();
+            lensCtx.arc(centerX, centerY, (lensSize / 2) - ringThickness, 0, 2 * Math.PI);
+            lensCtx.clip();
+            const grad = lensCtx.createRadialGradient(centerX, centerY, (lensSize / 2) - ringThickness - 20, centerX, centerY, (lensSize / 2) - ringThickness);
+            grad.addColorStop(0, 'rgba(0,0,0,0)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.3)');
+            lensCtx.fillStyle = grad;
+            lensCtx.fillRect(0, 0, lensSize, lensSize);
+            lensCtx.restore();
+
+            lensHandle.style.backgroundColor = hex;
+            titleLensHandle.style.backgroundColor = hex;
+
             lensCtx.fillStyle = `rgb(${255 - pixel[0]}, ${255 - pixel[1]}, ${255 - pixel[2]})`;
             lensCtx.beginPath();
-            lensCtx.arc(centerX, centerY, Math.max(2, zoom / 3), 0, 2 * Math.PI);
+            lensCtx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
             lensCtx.fill();
             lensCtx.strokeStyle = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
             lensCtx.lineWidth = 1;
@@ -1401,24 +1590,34 @@
 
         zoomSlider.addEventListener('input', (e) => {
             currentZoom = parseFloat(e.target.value);
+            isZoomAtDefault = (currentZoom === defaultFitZoom);
+            zoomToggleBtn.innerText = isZoomAtDefault ? "100%" : "Default";
             if (pendingRAF) cancelAnimationFrame(pendingRAF);
             pendingRAF = requestAnimationFrame(() => updateMagnifierPosition());
         });
 
-        zoom100Btn.addEventListener('click', () => {
-            currentZoom = 1;
+        zoomToggleBtn.addEventListener('click', () => {
+            if (isZoomAtDefault) {
+                currentZoom = 1;
+                zoomToggleBtn.innerText = "Default";
+                isZoomAtDefault = false;
+            } else {
+                currentZoom = defaultFitZoom;
+                zoomToggleBtn.innerText = "100%";
+                isZoomAtDefault = true;
+            }
             updateMagnifierPosition();
         });
 
-        function handleZoomWheel(e) {
+        window.addEventListener('wheel', (e) => {
+            if (!img.src) return;
             e.preventDefault();
             currentZoom = e.deltaY > 0 ? Math.max(minZoom, parseFloat((currentZoom - 0.5).toFixed(1))) : Math.min(maxZoom, parseFloat((currentZoom + 0.5).toFixed(1)));
+            isZoomAtDefault = (currentZoom === defaultFitZoom);
+            zoomToggleBtn.innerText = isZoomAtDefault ? "100%" : "Default";
             if (pendingRAF) cancelAnimationFrame(pendingRAF);
             pendingRAF = requestAnimationFrame(() => updateMagnifierPosition());
-        }
-
-        lensCanvas.addEventListener('wheel', handleZoomWheel, { passive: false });
-        lensHandle.addEventListener('wheel', handleZoomWheel, { passive: false });
+        }, { passive: false });
 
         lensCanvas.addEventListener('click', (e) => {
             if (hasMovedDuringDrag) return; 
@@ -1447,34 +1646,47 @@
             dragOffsetY = pos.y - currentCanvasY;
         }
 
-        lensHandle.addEventListener('mousedown', (e) => { 
-            e.stopPropagation(); 
-            e.preventDefault(); 
-            startLensDrag(e.clientX, e.clientY); 
-        });
-        lensHandle.addEventListener('touchstart', (e) => { 
-            e.stopPropagation(); 
-            e.preventDefault(); 
-            startLensDrag(e.touches[0].clientX, e.touches[0].clientY); 
-        }, { passive: false });
+        lensHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); startLensDrag(e.clientX, e.clientY); });
+        lensHandle.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); startLensDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
 
         lensHandle.addEventListener('dblclick', (e) => {
             e.stopPropagation();
             e.preventDefault();
             currentZoom = defaultFitZoom;
+            isZoomAtDefault = true;
+            zoomToggleBtn.innerText = "100%";
             updateMagnifierPosition();
         });
 
-        lensCanvas.addEventListener('mousedown', (e) => { 
-            e.stopPropagation(); 
-            e.preventDefault(); 
-            startLensDrag(e.clientX, e.clientY); 
-        });
-        lensCanvas.addEventListener('touchstart', (e) => { 
-            e.stopPropagation(); 
-            e.preventDefault(); 
-            startLensDrag(e.touches[0].clientX, e.touches[0].clientY); 
-        }, { passive: false });
+        lensCanvas.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); startLensDrag(e.clientX, e.clientY); });
+        lensCanvas.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); startLensDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+
+        canvasViewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialPinchZoom = currentZoom;
+            }
+        }, { passive: true });
+
+        canvasViewport.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && initialPinchDistance !== null) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const ratio = currentDistance / initialPinchDistance;
+                currentZoom = Math.max(minZoom, Math.min(maxZoom, initialPinchZoom * ratio));
+                isZoomAtDefault = (currentZoom === defaultFitZoom);
+                zoomToggleBtn.innerText = isZoomAtDefault ? "100%" : "Default";
+                if (pendingRAF) cancelAnimationFrame(pendingRAF);
+                pendingRAF = requestAnimationFrame(() => updateMagnifierPosition());
+            }
+        }, { passive: true });
+
+        canvasViewport.addEventListener('touchend', () => { initialPinchDistance = null; });
 
         window.addEventListener('mousemove', (e) => {
             if (!isDraggingLens || !img.src) return;
@@ -1489,7 +1701,7 @@
         });
 
         window.addEventListener('touchmove', (e) => {
-            if (!isDraggingLens || !img.src) return;
+            if (!isDraggingLens || !img.src || e.touches.length !== 1) return;
             hasMovedDuringDrag = true;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(() => {
