@@ -302,8 +302,8 @@
         .popup-menu {
             position: absolute;
             bottom: 45px;
-            left: 50%;
-            transform: translateX(-50%) translateY(0) scale(1);
+            right: 0;
+            left: auto;
             background: rgba(20, 20, 20, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -316,7 +316,7 @@
             box-sizing: border-box;
             z-index: 100;
             pointer-events: auto;
-            transform-origin: bottom center;
+            transform-origin: bottom right;
             transition: opacity 0.3s ease, transform 0.3s ease;
             opacity: 1;
             overflow-y: auto;
@@ -325,7 +325,26 @@
 
         .popup-menu.hidden {
             opacity: 0;
-            transform: translateX(-50%) translateY(20px) scale(0.2) scaleX(0.05);
+            transform: translateY(15px) scale(0.95);
+            pointer-events: none !important;
+            visibility: hidden;
+            overflow: hidden;
+        }
+
+        #loadMenuPopupInitial {
+            position: absolute;
+            top: 100%;
+            bottom: auto;
+            margin-top: 6px;
+            left: 0;
+            right: auto;
+            width: 100%;
+            transform-origin: top center;
+        }
+
+        #loadMenuPopupInitial.hidden {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
             pointer-events: none !important;
             visibility: hidden;
             overflow: hidden;
@@ -1298,7 +1317,7 @@
         }
 
         // Robust popup containment helper to ensure menus stay within screen limits
-        function togglePopup(popupEl) {
+function togglePopup(popupEl) {
             const allPopups = [loadMenuPopup, loadMenuPopupInitial, metadataPopup, instructionsPopup];
             allPopups.forEach(p => {
                 if (p !== popupEl) p.classList.add('hidden');
@@ -1306,21 +1325,6 @@
 
             if (popupEl.classList.contains('hidden')) {
                 popupEl.classList.remove('hidden');
-                
-                // Reset styling to calculate natural position
-                popupEl.style.left = '50%';
-                popupEl.style.transform = 'translateX(-50%) translateY(0) scale(1)';
-                
-                // Check if menu overflows screen limits horizontally
-                const rect = popupEl.getBoundingClientRect();
-                const padding = 12;
-                if (rect.right > window.innerWidth - padding) {
-                    const overflow = rect.right - (window.innerWidth - padding);
-                    popupEl.style.transform = `translateX(calc(-50% - ${overflow}px)) translateY(0) scale(1)`;
-                } else if (rect.left < padding) {
-                    const overflow = padding - rect.left;
-                    popupEl.style.transform = `translateX(calc(-50% + ${overflow}px)) translateY(0) scale(1)`;
-                }
             } else {
                 popupEl.classList.add('hidden');
             }
