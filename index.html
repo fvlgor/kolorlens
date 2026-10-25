@@ -326,7 +326,8 @@
         .popup-menu.hidden {
             opacity: 0;
             transform: translateX(-50%) translateY(20px) scale(0.2) scaleX(0.05);
-            pointer-events: none;
+            pointer-events: none !important;
+            visibility: hidden;
             overflow: hidden;
         }
 
@@ -678,10 +679,111 @@
             .initial-title { font-size: 26px; }
             .zoom-btn { font-size: 11px; padding: 5px 8px; }
         }
+
+        .rainbow-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.3);
+            display: inline-block;
+            vertical-align: middle;
+            box-shadow: 0 0 6px rgba(255,0,0,0.5);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .rainbow-circle:hover { transform: scale(1.1); }
+
+        #manualColorModalOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #manualColorModalOverlay.active { opacity: 1; pointer-events: auto; }
+        .manual-color-modal {
+            background: #141414; border: 1px solid #333; padding: 18px 20px;
+            border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+            width: 100%; max-width: 300px; box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 14px;
+            transform: scale(0.9); transition: transform 0.3s ease;
+        }        #manualColorModalOverlay.active .manual-color-modal { transform: scale(1); }
+        .color-preview-circle {
+            width: 60px; height: 60px; border-radius: 50%;
+            margin: 0 auto; border: 2px solid rgba(255,255,255,0.3);
+            background: #000000; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .input-group-wrapper {
+            display: flex; flex-direction: column; gap: 4px; position: relative;
+        }
+        .input-group-row {
+            display: flex; align-items: center; gap: 8px; width: 100%;
+        }
+        .input-group-row input {
+            background: #0a0a0a; border: 1px solid #444; color: #fff;
+            padding: 6px 4px; border-radius: 6px; font-size: 12px; outline: none; 
+            font-family: monospace; box-sizing: border-box;
+        }
+        .input-group-row input:focus { border-color: var(--primary); }
+        .copy-icon-btn {
+            background: #222; border: 1px solid #444; color: #fff;
+            padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;
+        }
+        .copy-icon-btn:hover { background: #333; }
+        .error-tooltip {
+            font-size: 11px; color: #ff4444; display: none; margin-top: 2px;
+        }
+        .error-tooltip.visible { display: block; }
     </style>
 </head>
 <body>
     <div id="splashOverlay"></div>
+
+<!--manualentry-modal-->
+    <div id="manualColorModalOverlay">
+        <div class="manual-color-modal" style="max-width: 300px; width: 100%;">
+            <h3 style="margin:0; font-size:16px; color:#fff; text-align:center;" id="manualModalTitle">Enter Color Value</h3>
+            <div class="color-preview-circle" id="manualColorPreview"></div>
+            
+            <div class="input-group-wrapper">
+                <div class="input-group-row" style="gap: 6px;">
+                    <span style="font-size: 11px; color: var(--text-muted); width: 32px;" id="manualHexLabel">HEX:</span>
+                    <input type="text" id="manualHexInput" maxlength="6" placeholder="#FF0000" style="font-family:monospace; text-align:center;">
+                    <button class="copy-icon-btn" id="copyManualHex" title="Copy HEX"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+</svg></button>
+                </div>
+                <span class="error-tooltip" id="hexError">Invalid HEX code</span>
+            </div>
+
+            <div class="input-group-wrapper">
+                <div class="input-group-row" style="gap: 4px;">
+                    <span style="font-size: 11px; color: var(--text-muted); width: 32px;" id="manualRgbLabel">RGB:</span>
+                    <input type="text" id="manualR" maxlength="3" placeholder="R" style="text-align:center; font-family:monospace; width:45px; min-width:40px; padding: 6px 2px;">
+                    <span style="color:#fff;">,</span>
+                    <input type="text" id="manualG" maxlength="3" placeholder="G" style="text-align:center; font-family:monospace; width:45px; min-width:40px; padding: 6px 2px;">
+                    <span style="color:#fff;">,</span>
+                    <input type="text" id="manualB" maxlength="3" placeholder="B" style="text-align:center; font-family:monospace; width:45px; min-width:40px; padding: 6px 2px;">
+                    <button class="copy-icon-btn" id="copyManualRgb" title="Copy RGB"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+</svg></button>
+                </div>
+                <span class="error-tooltip" id="rgbError">Invalid RGB values (0-255)</span>
+            </div>
+
+            <div class="url-modal-actions" style="margin-top:4px; justify-content: center;">
+                <button class="url-modal-btn" id="manualModalClose">Close</button>
+            </div>
+        </div>
+    </div>
+    <!--manualentry-modal-->
 
     <div id="urlModalOverlay">
         <div class="url-modal">
@@ -704,22 +806,19 @@
                 <h1 class="initial-title" id="initialTitleText" style="opacity: 0; transform: translateY(20px); transition: all 0.6s ease 0.3s;">KOLORLENS</h1> 
             </div>
             <div class="initial-actions" id="initialActionsGroup" style="opacity: 0; transform: translateY(15px); transition: all 0.6s ease 0.5s;">
-                <div class="load-dropdown-container" style="width: 100%;">
+                <div class="load-dropdown-container" style="width: 120px;">
                     <button class="load-menu-btn" id="loadMenuToggleBtnInitial" style="width: 100%;">LOAD ▼</button>
                     <div class="popup-menu load-menu-popup hidden" id="loadMenuPopupInitial">
                         <button class="popup-menu-item" id="menuChooseImageInitial">📁 Choose Image</button>
                         <button class="popup-menu-item" id="menuClipboardInitial">📋 Paste Image</button>
                         <button class="popup-menu-item" id="menuColorSpectrumInitial">🌈 Color Spectrum</button>
                         <button class="popup-menu-item" id="menuImageUrlInitial">🔗 Image URL</button>
+                        <button class="popup-menu-item" id="menuEnterValueInitial">
+                            <div class="rainbow-circle" style="width:16px; height:16px; pointer-events:none;"></div> 
+                            <span id="menuEnterValueTextInitial">Enter Value</span>
+                        </button>
                     </div>
                 </div>
-                <select class="initial-lang-select" id="initialLangSelector">
-                    <option value="en" selected>English</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                    <option value="de">Deutsch</option>
-                    <option value="zh">中文</option>
-                </select>
             </div>
             <div style="font-size: 13px; color: var(--text-muted); opacity: 0; transition: opacity 0.6s ease 0.6s; text-align: justify;" id="dropHintText">Or drag and drop an image here</div>
         </div>
@@ -745,6 +844,11 @@
                             <button class="popup-menu-item" id="menuClipboard">📋 Paste Image</button>
                             <button class="popup-menu-item" id="menuColorSpectrum">🌈 Color Spectrum</button>
                             <button class="popup-menu-item" id="menuImageUrl">🔗 Image URL</button>
+                            <!-- Inside normal LOAD menu (loadMenuPopup) -->
+                            <button class="popup-menu-item" id="menuEnterValue">
+                                <div class="rainbow-circle" style="width:16px; height:16px; pointer-events:none;"></div> 
+                                <span id="menuEnterValueText">Enter Value</span>
+                            </button>
                         </div>
                     </div>
                     <input type="file" id="imageLoaderActive" accept="image/*">
@@ -767,13 +871,6 @@
                                 • <strong>Zoom Controls & Pinch-Zoom:</strong> Use mouse scroll anywhere, slider, Default/100% toggle button, or mobile pinch-zoom directly on the image canvas.<br><br>
                                 • <strong>EXIF & Metadata:</strong> Click the ℹ button to view full camera EXIF specs (Make, Model, ISO, Shutter, Aperture, GPS) and file properties.
                             </div>
-                            <select class="lang-select" id="langSelector">
-                                <option value="en" selected>English</option>
-                                <option value="es">Español</option>
-                                <option value="fr">Français</option>
-                                <option value="de">Deutsch</option>
-                                <option value="zh">中文</option>
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -784,6 +881,7 @@
                     <div class="codes-group">
                         <span class="code-box" id="hexCode" onclick="copyToClipboard(this.innerText)">HEX: --</span>
                         <span class="code-box" id="rgbCode" onclick="copyToClipboard(this.innerText)">RGB: --</span>
+                        <div class="rainbow-circle" id="rainbowCircleBtn" title="Enter Color Manually"></div>
                     </div>
                 </div>
             </div>
@@ -797,10 +895,20 @@
         <div class="lens-handle" id="lensHandle" title="Drag lens handle (Double-click to reset zoom)"></div>
     </div>
 
-    <footer>
-        <span id="footerTitleSlot">KOLORLENS v062 |</span>
-        <div class="credits" id="footerCreditsText">Created by KAWN HYPERSYSTEMS</div>
+<footer>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%;">
+            <span id="footerTitleSlot">KOLORLENS |</span>
+            <div class="credits" id="footerCreditsText">Created by KAWN HYPERSYSTEMS</div>
+            <select class="footer-lang-select" id="footerLangSelector" style="background: rgba(31, 31, 31, 0.75); color: var(--text); border: 1px solid rgba(255, 255, 255, 0.25); padding: 4px 8px; border-radius: 4px; font-size: 11px; outline: none; cursor: pointer;">
+                <option value="en" selected>English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="zh">中文</option>
+            </select>
+        </div>
     </footer>
+
     <div id="toast">Copied to clipboard!</div>
 
     <script>
@@ -812,6 +920,9 @@
                 clipboard: "📋 Paste Image",
                 colorSpectrum: "🌈 Color Spectrum",
                 imageUrl: "🔗 Image URL",
+                enterValue: "Enter Value",
+                manualModalTitle: "Enter Color Value",
+                closeBtn: "Close",
                 zoom: "Zoom",
                 dropHint: "Or drag and drop an image here",
                 footerCredits: "Created by KAWN HYPERSYSTEMS",
@@ -822,6 +933,28 @@
                 urlModalCancel: "Cancel",
                 urlModalSubmit: "Load Image",
                 clipboardError: "No image found in your clipboard! Try pressing Ctrl+V anywhere on the page.",
+                noImageLoaded: "No image loaded yet.",
+                metaFileName: "File Name",
+                metaDimensions: "Pixel Dimensions",
+                metaResolution: "Total Resolution",
+                metaAspect: "Aspect Ratio",
+                metaFileSize: "File Size",
+                metaFormat: "MIME / Format",
+                metaModified: "Last Modified",
+                metaSource: "Source Path / URL",
+                exifSectionHeader: "Camera EXIF Data",
+                exifMake: "Camera Make",
+                exifModel: "Camera Model",
+                exifIso: "ISO Speed",
+                exifExposure: "Exposure Time",
+                exifAperture: "F-Number / Aperture",
+                exifFocal: "Focal Length",
+                exifDateTime: "Capture Date/Time",
+                exifSoftware: "Software / Editing",
+                exifFlash: "Flash Mode",
+                exifGpsLat: "GPS Latitude",
+                exifGpsLon: "GPS Longitude",
+                noExifDetected: "No EXIF tags detected in this file.",
                 _f1: "CAMA88"
             },
             es: {
@@ -831,6 +964,9 @@
                 clipboard: "📋 Pegar Imagen",
                 colorSpectrum: "🌈 Espectro de Color",
                 imageUrl: "🔗 URL de Imagen",
+                enterValue: "Ingresar Valor",
+                manualModalTitle: "Ingresar Valor de Color",
+                closeBtn: "Cerrar",
                 zoom: "Zoom",
                 dropHint: "O arrastra y suelta una imagen aquí",
                 footerCredits: "Creado por KAWN HYPERSYSTEMS",
@@ -840,7 +976,29 @@
                 urlModalPlaceholder: "https://ejemplo.com/imagen.jpg",
                 urlModalCancel: "Cancelar",
                 urlModalSubmit: "Cargar Imagen",
-                clipboardError: "¡No se encontró ninguna imagen en el portapapeles! Intente presionar Ctrl+V."
+                clipboardError: "¡No se encontró ninguna imagen en el portapapeles! Intente presionar Ctrl+V.",
+                noImageLoaded: "Aún no se ha cargado ninguna imagen.",
+                metaFileName: "Nombre de archivo",
+                metaDimensions: "Dimensiones de píxeles",
+                metaResolution: "Resolución total",
+                metaAspect: "Relación de aspecto",
+                metaFileSize: "Tamaño de archivo",
+                metaFormat: "MIME / Formato",
+                metaModified: "Última modificación",
+                metaSource: "Ruta / URL de origen",
+                exifSectionHeader: "Datos EXIF de la cámara",
+                exifMake: "Marca de cámara",
+                exifModel: "Modelo de cámara",
+                exifIso: "Sensibilidad ISO",
+                exifExposure: "Tiempo de exposición",
+                exifAperture: "Número F / Apertura",
+                exifFocal: "Distancia focal",
+                exifDateTime: "Fecha/Hora de captura",
+                exifSoftware: "Software / Edición",
+                exifFlash: "Modo de flash",
+                exifGpsLat: "Latitud GPS",
+                exifGpsLon: "Longitud GPS",
+                noExifDetected: "No se detectaron etiquetas EXIF en este archivo."
             },
             fr: {
                 title: "KOLORLENS",
@@ -849,6 +1007,9 @@
                 clipboard: "📋 Coller l'image",
                 colorSpectrum: "🌈 Spectre de Couleurs",
                 imageUrl: "🔗 URL de l'image",
+                enterValue: "Entrer une valeur",
+                manualModalTitle: "Entrer une valeur de couleur",
+                closeBtn: "Fermer",
                 zoom: "Zoom",
                 dropHint: "Ou glissez-déposez une image ici",
                 footerCredits: "Créé par KAWN HYPERSYSTEMS",
@@ -858,7 +1019,29 @@
                 urlModalPlaceholder: "https://exemple.com/image.jpg",
                 urlModalCancel: "Annuler",
                 urlModalSubmit: "Charger",
-                clipboardError: "Aucune image trouvée dans le presse-papier ! Essayez Ctrl+V."
+                clipboardError: "Aucune image trouvée dans le presse-papier ! Essayez Ctrl+V.",
+                noImageLoaded: "Aucune image chargée pour le moment.",
+                metaFileName: "Nom de fichier",
+                metaDimensions: "Dimensions des pixels",
+                metaResolution: "Résolution totale",
+                metaAspect: "Ratio d'aspect",
+                metaFileSize: "Taille du fichier",
+                metaFormat: "MIME / Format",
+                metaModified: "Dernière modification",
+                metaSource: "Chemin d'accès / URL source",
+                exifSectionHeader: "Données EXIF de l'appareil",
+                exifMake: "Marque de l'appareil",
+                exifModel: "Modèle de l'appareil",
+                exifIso: "Sensibilité ISO",
+                exifExposure: "Temps d'exposition",
+                exifAperture: "Nombre F / Ouverture",
+                exifFocal: "Longueur focale",
+                exifDateTime: "Date/Heure de capture",
+                exifSoftware: "Logiciel / Édition",
+                exifFlash: "Mode Flash",
+                exifGpsLat: "Latitude GPS",
+                exifGpsLon: "Longitude GPS",
+                noExifDetected: "Aucune balise EXIF détectée dans ce fichier."
             },
             de: {
                 title: "KOLORLENS",
@@ -867,6 +1050,9 @@
                 clipboard: "📋 Bild einfügen",
                 colorSpectrum: "🌈 Farbspektrum",
                 imageUrl: "🔗 Bild-URL",
+                enterValue: "Wert eingeben",
+                manualModalTitle: "Farbwert eingeben",
+                closeBtn: "Schließen",
                 zoom: "Zoom",
                 dropHint: "Oder Bild hierher ziehen und ablegen",
                 footerCredits: "Erstellt von KAWN HYPERSYSTEMS",
@@ -876,7 +1062,29 @@
                 urlModalPlaceholder: "https://beispiel.de/bild.jpg",
                 urlModalCancel: "Abbrechen",
                 urlModalSubmit: "Laden",
-                clipboardError: "Kein Bild in der Zwischenablage gefunden! Versuchen Sie Strg+V."
+                clipboardError: "Kein Bild in der Zwischenablage gefunden! Versuchen Sie Strg+V.",
+                noImageLoaded: "Noch kein Bild geladen.",
+                metaFileName: "Dateiname",
+                metaDimensions: "Pixelabmessungen",
+                metaResolution: "Gesamtauflösung",
+                metaAspect: "Seitenverhältnis",
+                metaFileSize: "Dateigröße",
+                metaFormat: "MIME / Format",
+                metaModified: "Zuletzt geändert",
+                metaSource: "Quellpfad / URL",
+                exifSectionHeader: "Kamera-EXIF-Daten",
+                exifMake: "Kamerahersteller",
+                exifModel: "Kameramodell",
+                exifIso: "ISO-Empfindlichkeit",
+                exifExposure: "Belichtungszeit",
+                exifAperture: "Blendenzahl / Blende",
+                exifFocal: "Brennweite",
+                exifDateTime: "Aufnahmedatum/-zeit",
+                exifSoftware: "Software / Bearbeitung",
+                exifFlash: "Blitzmodus",
+                exifGpsLat: "GPS-Breitengrad",
+                exifGpsLon: "GPS-Längengrad",
+                noExifDetected: "Keine EXIF-Tags in dieser Datei erkannt."
             },
             zh: {
                 title: "KOLORLENS",
@@ -885,6 +1093,9 @@
                 clipboard: "📋 粘贴图片",
                 colorSpectrum: "🌈 色彩光谱",
                 imageUrl: "🔗 图片网址",
+                enterValue: "输入色值",
+                manualModalTitle: "输入颜色数值",
+                closeBtn: "关闭",
                 zoom: "Zoom",
                 dropHint: "或将图片拖放至此处",
                 footerCredits: "由 KAWN HYPERSYSTEMS 创建",
@@ -894,7 +1105,29 @@
                 urlModalPlaceholder: "https://example.com/image.jpg",
                 urlModalCancel: "取消",
                 urlModalSubmit: "加载图片",
-                clipboardError: "剪贴板中未找到图片！可直接按 Ctrl+V 粘贴。"
+                clipboardError: "剪贴板中未找到图片！可直接按 Ctrl+V 粘贴。",
+                noImageLoaded: "尚未加载任何图像。",
+                metaFileName: "文件名",
+                metaDimensions: "像素尺寸",
+                metaResolution: "总分辨率",
+                metaAspect: "宽高比",
+                metaFileSize: "文件大小",
+                metaFormat: "MIME / 格式",
+                metaModified: "修改时间",
+                metaSource: "来源路径 / 网址",
+                exifSectionHeader: "相机 EXIF 数据",
+                exifMake: "相机品牌",
+                exifModel: "相机型号",
+                exifIso: "ISO 感光度",
+                exifExposure: "曝光时间",
+                exifAperture: "光圈值",
+                exifFocal: "焦距",
+                exifDateTime: "拍摄时间",
+                exifSoftware: "软件 / 编辑",
+                exifFlash: "闪光灯模式",
+                exifGpsLat: "GPS 纬度",
+                exifGpsLon: "GPS 经度",
+                noExifDetected: "此文件中未检测到 EXIF 标签。"
             }
         };
 
@@ -1018,10 +1251,13 @@
             }, 700);
         });
 
+        const footerLangSelector = document.getElementById('footerLangSelector');
+        if (footerLangSelector) footerLangSelector.addEventListener('change', (e) => setLanguage(e.target.value));
+
         function setLanguage(lang) {
             currentLang = lang;
             if (langSelector) langSelector.value = lang;
-            if (initialLangSelector) initialLangSelector.value = lang;
+            if (footerLangSelector) footerLangSelector.value = lang;
             const t = translations[currentLang];
             initialTitleText.innerText = t.title;
             workspaceHeaderTitle.innerText = t.title;
@@ -1041,14 +1277,25 @@
             [menuColorSpectrum, menuColorSpectrumInitial].forEach(el => el.innerText = loadTexts[2]);
             [menuImageUrl, menuImageUrlInitial].forEach(el => el.innerText = loadTexts[3]);
 
+            const enterValueElements = [
+                document.getElementById('menuEnterValueText'),
+                document.getElementById('menuEnterValueTextInitial')
+            ];
+            enterValueElements.forEach(el => {
+                if (el) el.innerText = t.enterValue;
+            });
+
+            document.getElementById('manualModalTitle').innerText = t.manualModalTitle;
+            document.getElementById('manualModalClose').innerText = t.closeBtn;
+
             modalTitleText.innerText = t.urlModalTitle;
             urlModalInput.placeholder = t.urlModalPlaceholder;
             urlModalCancel.innerText = t.urlModalCancel;
             urlModalSubmit.innerText = t.urlModalSubmit;
-        }
 
-        if (langSelector) langSelector.addEventListener('change', (e) => setLanguage(e.target.value));
-        if (initialLangSelector) initialLangSelector.addEventListener('change', (e) => setLanguage(e.target.value));
+            // Re-render metadata content immediately on language change
+            updateMetadataDisplay();
+        }
 
         // Robust popup containment helper to ensure menus stay within screen limits
         function togglePopup(popupEl) {
@@ -1113,6 +1360,12 @@
             if (!loadMenuToggleBtnInitial.contains(e.target) && !loadMenuPopupInitial.contains(e.target)) {
                 loadMenuPopupInitial.classList.add('hidden');
             }
+            if (e.target === manualColorModalOverlay) {
+                manualColorModalOverlay.classList.remove('active');
+            }
+            if (e.target === urlModalOverlay) {
+                urlModalOverlay.classList.remove('active');
+            }
         });
 
         // Prevent wheel events inside popup menus from triggering image zoom
@@ -1135,8 +1388,9 @@
         }
 
         function updateMetadataDisplay() {
+            const t = translations[currentLang];
             if (!img.src) {
-                metadataContent.innerHTML = "<em>No image loaded yet.</em>";
+                metadataContent.innerHTML = `<em>${t.noImageLoaded}</em>`;
                 return;
             }
             const sizeBytes = currentImageMetadata.size;
@@ -1163,32 +1417,32 @@
                 const gpsLon = formatGPS(exif.GPSLongitude, exif.GPSLongitudeRef);
 
                 exifHTML = `
-                    <br><br><strong>--- Camera EXIF Data ---</strong><br>
-                    • <strong>Camera Make:</strong> ${make}<br>
-                    • <strong>Camera Model:</strong> ${model}<br>
-                    • <strong>ISO Speed:</strong> ${iso}<br>
-                    • <strong>Exposure Time:</strong> ${exposure}<br>
-                    • <strong>F-Number / Aperture:</strong> ${fNumber}<br>
-                    • <strong>Focal Length:</strong> ${focalLength}<br>
-                    • <strong>Capture Date/Time:</strong> ${dateTimeOriginal}<br>
-                    • <strong>Software / Editing:</strong> ${software}<br>
-                    • <strong>Flash Mode:</strong> ${flash}<br>
-                    • <strong>GPS Latitude:</strong> ${gpsLat}<br>
-                    • <strong>GPS Longitude:</strong> ${gpsLon}<br>
+                    <br><br><strong>--- ${t.exifSectionHeader} ---</strong><br>
+                    • <strong>${t.exifMake}:</strong> ${make}<br>
+                    • <strong>${t.exifModel}:</strong> ${model}<br>
+                    • <strong>${t.exifIso}:</strong> ${iso}<br>
+                    • <strong>${t.exifExposure}:</strong> ${exposure}<br>
+                    • <strong>${t.exifAperture}:</strong> ${fNumber}<br>
+                    • <strong>${t.exifFocal}:</strong> ${focalLength}<br>
+                    • <strong>${t.exifDateTime}:</strong> ${dateTimeOriginal}<br>
+                    • <strong>${t.exifSoftware}:</strong> ${software}<br>
+                    • <strong>${t.exifFlash}:</strong> ${flash}<br>
+                    • <strong>${t.exifGpsLat}:</strong> ${gpsLat}<br>
+                    • <strong>${t.exifGpsLon}:</strong> ${gpsLon}<br>
                 `;
             } else {
-                exifHTML = `<br><br><strong>--- Camera EXIF Data ---</strong><br>• <em>No EXIF tags detected in this file.</em><br>`;
+                exifHTML = `<br><br><strong>--- ${t.exifSectionHeader} ---</strong><br>• <em>${t.noExifDetected}</em><br>`;
             }
 
             metadataContent.innerHTML = `
-                • <strong>File Name:</strong> ${currentImageMetadata.name}<br>
-                • <strong>Pixel Dimensions:</strong> ${img.width} × ${img.height} px<br>
-                • <strong>Total Resolution:</strong> ${totalPixels} MP<br>
-                • <strong>Aspect Ratio:</strong> ${aspectStr} (${img.width > img.height ? 'Landscape' : img.width < img.height ? 'Portrait' : 'Square'})<br>
-                • <strong>File Size:</strong> ${sizeFormatted}<br>
-                • <strong>MIME / Format:</strong> ${currentImageMetadata.type}<br>
-                • <strong>Last Modified:</strong> ${modDate}<br>
-                • <strong>Source Path / URL:</strong> ${currentImageMetadata.pathOrUrl || "Local Blob / Clipboard"}
+                • <strong>${t.metaFileName}:</strong> ${currentImageMetadata.name}<br>
+                • <strong>${t.metaDimensions}:</strong> ${img.width} × ${img.height} px<br>
+                • <strong>${t.metaResolution}:</strong> ${totalPixels} MP<br>
+                • <strong>${t.metaAspect}:</strong> ${aspectStr} (${img.width > img.height ? 'Landscape' : img.width < img.height ? 'Portrait' : 'Square'})<br>
+                • <strong>${t.metaFileSize}:</strong> ${sizeFormatted}<br>
+                • <strong>${t.metaFormat}:</strong> ${currentImageMetadata.type}<br>
+                • <strong>${t.metaModified}:</strong> ${modDate}<br>
+                • <strong>${t.metaSource}:</strong> ${currentImageMetadata.pathOrUrl || "Local Blob / Clipboard"}
                 ${exifHTML}
             `;
         }
@@ -1757,6 +2011,157 @@
                 setTimeout(() => { toast.style.opacity = '0'; }, 1500);
             });
         }
+
+        // manual entry
+
+        const rainbowCircleBtn = document.getElementById('rainbowCircleBtn');
+        const manualColorModalOverlay = document.getElementById('manualColorModalOverlay');
+        const manualModalClose = document.getElementById('manualModalClose');
+        const manualColorPreview = document.getElementById('manualColorPreview');
+        const manualHexInput = document.getElementById('manualHexInput');
+        const manualR = document.getElementById('manualR');
+        const manualG = document.getElementById('manualG');
+        const manualB = document.getElementById('manualB');
+        const rgbInputs = [manualR, manualG, manualB];
+        const hexError = document.getElementById('hexError');
+        const rgbError = document.getElementById('rgbError');
+        const copyManualHex = document.getElementById('copyManualHex');
+        const copyManualRgb = document.getElementById('copyManualRgb');
+
+        const menuEnterValue = document.getElementById('menuEnterValue');
+        const menuEnterValueInitial = document.getElementById('menuEnterValueInitial');
+
+        if (menuEnterValue) menuEnterValue.addEventListener('click', () => { loadMenuPopup.classList.add('hidden'); openManualColorModal(); });
+        if (menuEnterValueInitial) menuEnterValueInitial.addEventListener('click', () => { loadMenuPopupInitial.classList.add('hidden'); openManualColorModal(); });
+        
+        function openManualColorModal() {
+            manualHexInput.value = "";
+            manualR.value = "";
+            manualG.value = "";
+            manualB.value = "";
+            manualColorPreview.style.background = "#000000";
+            hexError.classList.remove('visible');
+            rgbError.classList.remove('visible');
+            manualColorModalOverlay.classList.add('active');
+            manualHexInput.focus();
+        }
+
+        rainbowCircleBtn.addEventListener('click', openManualColorModal);
+        if (menuEnterValue) menuEnterValue.addEventListener('click', () => { loadMenuPopup.classList.add('hidden'); openManualColorModal(); });
+        if (menuEnterValueInitial) menuEnterValueInitial.addEventListener('click', () => { loadMenuPopupInitial.classList.add('hidden'); openManualColorModal(); });
+        if (manualModalClose) manualModalClose.addEventListener('click', () => { manualColorModalOverlay.classList.remove('active'); });
+
+        function isValidHex(hex) {
+            return /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex);
+        }
+
+        function hexToRgbObj(hex) {
+            let cleanHex = hex.replace('#', '');
+            if (cleanHex.length === 3) {
+                cleanHex = cleanHex.split('').map(c => c + c).join('');
+            }
+            const num = parseInt(cleanHex, 16);
+            return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => {
+                const hex = parseInt(x).toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join("").toUpperCase();
+        }
+
+        function updateFromRgbFields() {
+            const rStr = manualR.value.trim();
+            const gStr = manualG.value.trim();
+            const bStr = manualB.value.trim();
+
+            if (rStr === '' && gStr === '' && bStr === '') {
+                rgbError.classList.remove('visible');
+                manualColorPreview.style.background = '#000000';
+                manualHexInput.value = '';
+                return;
+            }
+
+            const r = parseInt(rStr, 10);
+            const g = parseInt(gStr, 10);
+            const b = parseInt(bStr, 10);
+
+            if (isNaN(r) || isNaN(g) || isNaN(b) || r > 255 || g > 255 || b > 255) {
+                rgbError.classList.add('visible');
+                return;
+            }
+            rgbError.classList.remove('visible');
+            const hex = rgbToHex(r, g, b);
+            manualHexInput.value = hex;
+            manualColorPreview.style.background = hex;
+            hexError.classList.remove('visible');
+        }
+
+        rgbInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/\D/g, '');
+                if (parseInt(val, 10) > 255) val = '255';
+                e.target.value = val;
+
+                if (val.length === 3 && index < rgbInputs.length - 1) {
+                    rgbInputs[index + 1].focus();
+                    rgbInputs[index + 1].select();
+                }
+                updateFromRgbFields();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' && index < rgbInputs.length - 1 && e.target.selectionEnd === e.target.value.length) {
+                    rgbInputs[index + 1].focus();
+                } else if (e.key === 'ArrowLeft' && index > 0 && e.target.selectionStart === 0) {
+                    rgbInputs[index - 1].focus();
+                }
+            });
+        });
+
+        manualHexInput.addEventListener('input', (e) => {
+            let val = e.target.value.trim().replace(/^#/, '');
+            if (val.length > 6) val = val.slice(0, 6);
+            e.target.value = val;
+
+            if (!val) {
+                hexError.classList.remove('visible');
+                manualColorPreview.style.background = '#000000';
+                manualR.value = ''; manualG.value = ''; manualB.value = '';
+                return;
+            }
+            if (isValidHex(val)) {
+                hexError.classList.remove('visible');
+                const fullHex = '#' + val;
+                manualColorPreview.style.background = fullHex;
+                const rgb = hexToRgbObj(fullHex);
+                manualR.value = rgb.r;
+                manualG.value = rgb.g;
+                manualB.value = rgb.b;
+                rgbError.classList.remove('visible');
+            } else {
+                hexError.classList.add('visible');
+            }
+        });
+
+        copyManualHex.addEventListener('click', () => {
+            if (isValidHex(manualHexInput.value)) {
+                const hexVal = manualHexInput.value.startsWith('#') ? manualHexInput.value : '#' + manualHexInput.value;
+                navigator.clipboard.writeText(hexVal);
+                toast.style.opacity = '1';
+                setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+            }
+        });
+
+        copyManualRgb.addEventListener('click', () => {
+            const r = manualR.value.trim(), g = manualG.value.trim(), b = manualB.value.trim();
+            if (r !== '' && g !== '' && b !== '') {
+                navigator.clipboard.writeText(`rgb(${r}, ${g}, ${b})`);
+                toast.style.opacity = '1';
+                setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+            }
+        });
     </script>
 </body>
 </html>
