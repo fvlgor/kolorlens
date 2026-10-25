@@ -800,7 +800,7 @@
     </div>
 
     <footer>
-        <span id="footerTitleSlot">KOLORLENS |</span>
+        <span id="footerTitleSlot">KOLORLENS v062|</span>
         <div class="credits" id="footerCreditsText">Created by KAWN HYPERSYSTEMS</div>
     </footer>
     <div id="toast">Copied to clipboard!</div>
@@ -823,7 +823,7 @@
                 urlModalPlaceholder: "https://example.com/image.jpg",
                 urlModalCancel: "Cancel",
                 urlModalSubmit: "Load Image",
-                clipboardError: "No image found in your clipboard!",
+                clipboardError: "No image found in your clipboard! Try pressing Ctrl+V anywhere on the page.",
                 _f1: "CAMA88"
             },
             es: {
@@ -842,7 +842,7 @@
                 urlModalPlaceholder: "https://ejemplo.com/imagen.jpg",
                 urlModalCancel: "Cancelar",
                 urlModalSubmit: "Cargar Imagen",
-                clipboardError: "¡No se encontró ninguna imagen en el portapapeles!"
+                clipboardError: "¡No se encontró ninguna imagen en el portapapeles! Intente presionar Ctrl+V."
             },
             fr: {
                 title: "KOLORLENS",
@@ -860,7 +860,7 @@
                 urlModalPlaceholder: "https://exemple.com/image.jpg",
                 urlModalCancel: "Annuler",
                 urlModalSubmit: "Charger",
-                clipboardError: "Aucune image trouvée dans le presse-papier !"
+                clipboardError: "Aucune image trouvée dans le presse-papier ! Essayez Ctrl+V."
             },
             de: {
                 title: "KOLORLENS",
@@ -878,7 +878,7 @@
                 urlModalPlaceholder: "https://beispiel.de/bild.jpg",
                 urlModalCancel: "Abbrechen",
                 urlModalSubmit: "Laden",
-                clipboardError: "Kein Bild in der Zwischenablage gefunden!"
+                clipboardError: "Kein Bild in der Zwischenablage gefunden! Versuchen Sie Strg+V."
             },
             zh: {
                 title: "KOLORLENS",
@@ -896,7 +896,7 @@
                 urlModalPlaceholder: "https://example.com/image.jpg",
                 urlModalCancel: "取消",
                 urlModalSubmit: "加载图片",
-                clipboardError: "剪贴板中未找到图片！"
+                clipboardError: "剪贴板中未找到图片！可直接按 Ctrl+V 粘贴。"
             }
         };
 
@@ -1052,33 +1052,54 @@
         if (langSelector) langSelector.addEventListener('change', (e) => setLanguage(e.target.value));
         if (initialLangSelector) initialLangSelector.addEventListener('change', (e) => setLanguage(e.target.value));
 
+        // Robust popup containment helper to ensure menus stay within screen limits
+        function togglePopup(popupEl) {
+            const allPopups = [loadMenuPopup, loadMenuPopupInitial, metadataPopup, instructionsPopup];
+            allPopups.forEach(p => {
+                if (p !== popupEl) p.classList.add('hidden');
+            });
+
+            if (popupEl.classList.contains('hidden')) {
+                popupEl.classList.remove('hidden');
+                
+                // Reset styling to calculate natural position
+                popupEl.style.left = '50%';
+                popupEl.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+                
+                // Check if menu overflows screen limits horizontally
+                const rect = popupEl.getBoundingClientRect();
+                const padding = 12;
+                if (rect.right > window.innerWidth - padding) {
+                    const overflow = rect.right - (window.innerWidth - padding);
+                    popupEl.style.transform = `translateX(calc(-50% - ${overflow}px)) translateY(0) scale(1)`;
+                } else if (rect.left < padding) {
+                    const overflow = padding - rect.left;
+                    popupEl.style.transform = `translateX(calc(-50% + ${overflow}px)) translateY(0) scale(1)`;
+                }
+            } else {
+                popupEl.classList.add('hidden');
+            }
+        }
+
         infoToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            loadMenuPopup.classList.add('hidden');
-            loadMenuPopupInitial.classList.add('hidden');
-            metadataPopup.classList.add('hidden');
-            instructionsPopup.classList.toggle('hidden');
+            togglePopup(instructionsPopup);
         });
 
         metadataToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            loadMenuPopup.classList.add('hidden');
-            loadMenuPopupInitial.classList.add('hidden');
-            instructionsPopup.classList.add('hidden');
             updateMetadataDisplay();
-            metadataPopup.classList.toggle('hidden');
+            togglePopup(metadataPopup);
         });
 
         loadMenuToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            instructionsPopup.classList.add('hidden');
-            metadataPopup.classList.add('hidden');
-            loadMenuPopup.classList.toggle('hidden');
+            togglePopup(loadMenuPopup);
         });
 
         loadMenuToggleBtnInitial.addEventListener('click', (e) => {
             e.stopPropagation();
-            loadMenuPopupInitial.classList.toggle('hidden');
+            togglePopup(loadMenuPopupInitial);
         });
 
         window.addEventListener('click', (e) => {
@@ -1204,31 +1225,47 @@
             urlModalInput.addEventListener('keydown', onKeyDown);
         }
 
+        // Robust clipboard paste function supporting both API read and global paste event
         async function loadImageFromClipboard() {
             try {
-                if (!navigator.clipboard || !navigator.clipboard.read) {
-                    alert("Clipboard API is not supported in this browser or context.");
-                    return;
-                }
-                const clipboardItems = await navigator.clipboard.read();
-                let imageBlob = null;
-                for (const item of clipboardItems) {
-                    const imageType = item.types.find(type => type.startsWith('image/'));
-                    if (imageType) {
-                        imageBlob = await item.getType(imageType);
-                        break;
+                if (navigator.clipboard && navigator.clipboard.read) {
+                    try {
+                        const clipboardItems = await navigator.clipboard.read();
+                        for (const item of clipboardItems) {
+                            for (const type of item.types) {
+                                if (type.startsWith('image/')) {
+                                    const blob = await item.getType(type);
+                                    loadImageFile(blob);
+                                    return;
+                                }
+                            }
+                        }
+                    } catch (readErr) {
+                        console.warn("Clipboard API read permission denied or restricted. Trying paste event shortcut fallback.", readErr);
                     }
                 }
-                if (!imageBlob) {
-                    alert(translations[currentLang].clipboardError);
-                    return;
-                }
-                loadImageFile(imageBlob);
+                alert(translations[currentLang].clipboardError);
             } catch (err) {
                 console.error(err);
                 alert(translations[currentLang].clipboardError);
             }
         }
+
+        // Global paste event listener for seamless Ctrl+V / Cmd+V image pasting anywhere
+        window.addEventListener('paste', (e) => {
+            if (e.clipboardData && e.clipboardData.items) {
+                for (let i = 0; i < e.clipboardData.items.length; i++) {
+                    if (e.clipboardData.items[i].type.indexOf('image') !== -1) {
+                        const blob = e.clipboardData.items[i].getAsFile();
+                        if (blob) {
+                            loadImageFile(blob);
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                }
+            }
+        });
 
         [menuChooseImage, menuChooseImageInitial].forEach(btn => btn.addEventListener('click', () => {
             loadMenuPopup.classList.add('hidden');
